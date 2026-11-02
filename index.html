@@ -191,6 +191,14 @@ tbody tr:last-child td{border-bottom:none}
 .tag-laranja{background:rgba(224,139,42,.16);color:#efa958;border-color:rgba(224,139,42,.3)}
 
 .chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{background:var(--grafite3);border:1px solid var(--borda);color:var(--texto-suave);padding:7px 13px;border-radius:20px;font-size:12.5px;font-weight:600;cursor:pointer}
+.chip.on{background:rgba(232,181,48,.16);border-color:var(--ouro);color:var(--ouro-claro)}
+.st-select{background:var(--grafite3);border:1px solid var(--borda);color:var(--texto);border-radius:7px;padding:5px 6px;font-size:11px;max-width:140px}
+.barras{display:flex;flex-direction:column;gap:9px}
+.barra-row{display:flex;align-items:center;gap:10px}
+.barra-lbl{width:92px;font-size:12px;color:var(--texto-suave);text-align:right;flex:none;text-transform:capitalize}
+.barra-track{flex:1;background:var(--grafite3);border-radius:6px;height:22px;overflow:hidden}
+.barra-fill{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;font-size:11.5px;font-weight:800;color:#1a1205;min-width:22px}
 
 /* Filtros */
 .filters{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
@@ -207,6 +215,7 @@ tbody tr:last-child td{border-bottom:none}
   align-items:center;justify-content:center;font-size:13px;transition:.12s}
 .ic-btn:hover{color:var(--texto);border-color:#4a5563}
 .ic-btn.wpp:hover{background:#1f9d4d;color:#fff;border-color:#1f9d4d}
+.ic-btn.call:hover{background:#2b6fb8;color:#fff;border-color:#2b6fb8}
 .ic-btn.edit:hover{background:var(--azul);color:#fff;border-color:var(--azul)}
 .ic-btn.del:hover{background:var(--vermelho);color:#fff;border-color:var(--vermelho)}
 .ic-btn.view:hover{background:var(--ouro);color:#111;border-color:var(--ouro)}
@@ -377,7 +386,8 @@ tbody tr:last-child td{border-bottom:none}
 @media print{
   body.printing .app, body.printing .modal-bg, body.printing .toast-wrap{display:none!important}
   body.printing #printArea{display:block!important;color:#111;font-family:'Segoe UI',Arial,sans-serif}
-  @page{margin:14mm 12mm}
+  body.printing #printArea .rep-footer{position:fixed;bottom:6mm;left:0;right:0;margin-top:0}
+  @page{margin:14mm 12mm 24mm}
 }
 
 /* Login */
@@ -489,6 +499,20 @@ tbody tr:last-child td{border-bottom:none}
             <div class="panel-body" id="alertBox"></div>
           </div>
         </div>
+        <div class="dash-2col">
+          <div class="panel">
+            <div class="panel-head"><h3>📊 Demandas por mês</h3></div>
+            <div class="panel-body"><div id="chartMes"></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>🧰 Demandas por tipo de serviço</h3></div>
+            <div class="panel-body"><div id="chartTipo"></div></div>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:18px">
+          <div class="panel-head"><h3>🏆 Desempenho por profissional</h3></div>
+          <div class="panel-body" id="desempenho"></div>
+        </div>
       </section>
 
       <!-- ========== CONTATOS ========== -->
@@ -598,11 +622,19 @@ tbody tr:last-child td{border-bottom:none}
             <button class="btn btn-ouro" onclick="openDemanda()">＋ Nova Demanda</button>
           </div>
           <div class="panel-body">
+            <div id="demChips" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">
+              <button class="chip on" data-f="todas" onclick="setFiltroRapido('todas')">Todas</button>
+              <button class="chip" data-f="aberto" onclick="setFiltroRapido('aberto')">Em aberto</button>
+              <button class="chip" data-f="hoje" onclick="setFiltroRapido('hoje')">⏰ Prazo hoje</button>
+              <button class="chip" data-f="atrasadas" onclick="setFiltroRapido('atrasadas')">🔴 Atrasadas</button>
+            </div>
             <div class="filters" style="margin-bottom:14px">
               <input type="text" id="fDemBusca" placeholder="🔎 Código, empresa, descrição, local..." oninput="renderDemandas()">
               <select id="fDemStatus" onchange="renderDemandas()"><option value="">Todos os status</option></select>
               <select id="fDemCidade" onchange="renderDemandas()"><option value="">Todas as cidades</option></select>
               <select id="fDemUrg" onchange="renderDemandas()"><option value="">Todas as urgências</option></select>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--texto-suave)">De <input type="date" id="fDemDe" onchange="renderDemandas()"></label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--texto-suave)">Até <input type="date" id="fDemAte" onchange="renderDemandas()"></label>
             </div>
             <div class="tbl-wrap">
               <table>
@@ -629,6 +661,8 @@ tbody tr:last-child td{border-bottom:none}
             <div class="filters" style="margin-bottom:14px">
               <input type="text" id="fVistBusca" placeholder="🔎 Placa, motorista, transportadora, carga..." oninput="renderVistorias()">
               <select id="fVistCidade" onchange="renderVistorias()"><option value="">Todas as cidades</option></select>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--texto-suave)">De <input type="date" id="fVistDe" onchange="renderVistorias()"></label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--texto-suave)">Até <input type="date" id="fVistAte" onchange="renderVistorias()"></label>
             </div>
             <div class="tbl-wrap"><table>
               <thead><tr><th>Código</th><th>Data</th><th>Placa</th><th>Transportadora</th><th>Carga</th><th>Local</th><th>Tipo</th><th>Checklist</th><th style="text-align:right">Ações</th></tr></thead>
@@ -1066,6 +1100,36 @@ function wppLink(num){
   if(d.length<=11 && d[0]!=='5') d='55'+d; // assume Brasil
   return'https://wa.me/'+d;
 }
+function telLink(num){
+  let d=soDigitos(num); if(!d)return'';
+  if(d.length<=11 && d[0]!=='5') d='55'+d;
+  return'tel:+'+d;
+}
+/* GPS: pega a localização do aparelho e preenche um campo */
+function pegarLocalizacao(campoId, hiddenId){
+  if(!navigator.geolocation){ toast('GPS não disponível neste aparelho.','err'); return; }
+  toast('Obtendo localização...','info');
+  navigator.geolocation.getCurrentPosition(function(pos){
+    const lat=pos.coords.latitude.toFixed(6), lng=pos.coords.longitude.toFixed(6);
+    const el=document.getElementById(campoId); if(el){ el.value=(el.value?el.value+' ':'')+'['+lat+', '+lng+']'; }
+    const hid=document.getElementById(hiddenId); if(hid) hid.value=lat+','+lng;
+    toast('Localização capturada! 📍');
+  }, function(){ toast('Não consegui pegar a localização. Permita o acesso no navegador.','err'); }, {enableHighAccuracy:true,timeout:12000});
+}
+function linkMapa(geo){ return geo?('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(geo)):''; }
+/* Fotos da demanda (mesma compressão das vistorias) */
+let demFotosTmp=[];
+function renderFotosDem(){
+  const box=document.getElementById('d_fotos'); if(!box)return;
+  box.innerHTML=demFotosTmp.map((f,i)=>`<div class="foto-item"><img src="${f}"><button class="rm" onclick="rmFotoDem(${i})">×</button></div>`).join('')
+    +`<div class="foto-add" onclick="document.getElementById('d_fotoInput').click()"><span style="font-size:20px">＋</span>Foto</div>`;
+}
+function rmFotoDem(i){ demFotosTmp.splice(i,1); renderFotosDem(); }
+async function addFotosDem(ev){
+  const files=[...ev.target.files]; let ok=0;
+  for(const f of files){ const d=await processarFoto(f); if(d){demFotosTmp.push(d);ok++;} }
+  ev.target.value=''; renderFotosDem(); if(ok)toast(ok+' foto(s) adicionada(s).');
+}
 function uniq(arr){return[...new Set(arr)];}
 
 /* =======================================================================
@@ -1171,6 +1235,30 @@ function renderDashboard(){
 
   if(!alerts.length) box.innerHTML='<div class="alert-ok">✅ Tudo em ordem. Nenhum alerta no momento.</div>';
   else box.innerHTML=alerts.map(([cls,ic,txt])=>`<div class="alert-item ${cls}"><span class="ai">${ic}</span><span class="at">${txt}</span></div>`).join('');
+
+  // Gráfico: demandas por mês (últimos 6)
+  const baseM=new Date(); baseM.setDate(1); const meses=[];
+  for(let i=5;i>=0;i--){ const dt=new Date(baseM.getFullYear(),baseM.getMonth()-i,1); meses.push([dt.toISOString().slice(0,7), dt.toLocaleDateString('pt-BR',{month:'short'})]); }
+  const porMes=meses.map(([key,lbl])=>[lbl, dem.filter(d=>(d.dataRecebimento||'').slice(0,7)===key).length]);
+  const cm=document.getElementById('chartMes'); if(cm) cm.innerHTML=miniBarras(porMes,'var(--azul)');
+  // Gráfico: por tipo (top 6)
+  const tipos={}; dem.forEach(d=>{ const t=d.tipoServico||'—'; tipos[t]=(tipos[t]||0)+1; });
+  const porTipo=Object.entries(tipos).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const ct=document.getElementById('chartTipo'); if(ct) ct.innerHTML=miniBarras(porTipo,'var(--ouro)');
+  // Desempenho por profissional
+  const perf={};
+  dem.forEach(d=>{ [d.profissional,d.preposto].forEach(nome=>{ if(nome){ perf[nome]=perf[nome]||{t:0,c:0}; perf[nome].t++; if(d.status==='Concluída')perf[nome].c++; } }); });
+  const ranking=Object.entries(perf).sort((a,b)=>b[1].t-a[1].t).slice(0,10);
+  const dz=document.getElementById('desempenho');
+  if(dz) dz.innerHTML = ranking.length ? `<div class="tbl-wrap"><table><thead><tr><th>Profissional</th><th>Atendimentos</th><th>Concluídos</th></tr></thead><tbody>${ranking.map(([n,o])=>`<tr><td><strong>${esc(n)}</strong></td><td>${pad2(o.t)}</td><td>${pad2(o.c)}</td></tr>`).join('')}</tbody></table></div>` : '<div class="t-empty">Ainda sem atendimentos designados a profissionais.</div>';
+}
+function miniBarras(dados,cor){
+  if(!dados.length) return '<div class="t-empty">Sem dados ainda.</div>';
+  const max=Math.max(1,...dados.map(d=>d[1]));
+  return '<div class="barras">'+dados.map(([l,v])=>`
+    <div class="barra-row"><div class="barra-lbl">${esc(l)}</div>
+      <div class="barra-track"><div class="barra-fill" style="width:${Math.max(6,Math.round(v/max*100))}%;background:${cor||'var(--ouro)'}">${v}</div></div>
+    </div>`).join('')+'</div>';
 }
 
 /* =======================================================================
@@ -1204,7 +1292,7 @@ function renderContatos(){
   if(!lista.length){tb.innerHTML=`<tr><td colspan="8" class="t-empty">Nenhum contato encontrado.</td></tr>`;return;}
   tb.innerHTML=lista.map(c=>{
     const grupos=(c.grupos||[]).map(g=>`<span class="tag tag-ouro">${esc(g)}</span>`).join(' ')||'<span class="tag tag-cinza">—</span>';
-    const wpp=wppLink(c.wpp||c.tel1);
+    const wpp=wppLink(c.wpp||c.tel1); const tel=telLink(c.tel1||c.wpp);
     const sit=c.situacao==='ativo'?'<span class="tag tag-verde">Ativo</span>':'<span class="tag tag-vermelho">Inativo</span>';
     return`<tr>
       <td><strong>${esc(c.nome)}</strong>${c.demo?' <span class="tag tag-cinza" style="font-size:9px">DEMO</span>':''}</td>
@@ -1215,6 +1303,7 @@ function renderContatos(){
       <td>${esc(c.empresa||'—')}</td>
       <td>${sit}</td>
       <td><div class="row-actions">
+        ${tel?`<a class="ic-btn call" href="${tel}" title="Ligar">📞</a>`:''}
         ${wpp?`<a class="ic-btn wpp" href="${wpp}" target="_blank" title="WhatsApp">💬</a>`:''}
         <button class="ic-btn view" onclick="verContato(${c.id})" title="Ver">👁️</button>
         <button class="ic-btn edit" onclick="openContato(${c.id})" title="Editar">✏️</button>
@@ -1285,8 +1374,14 @@ function delContato(id){
 }
 function verContato(id){
   const c=DB.contatos.find(x=>x.id===id);
-  const wpp=wppLink(c.wpp||c.tel1);
+  const wpp=wppLink(c.wpp||c.tel1); const tel=telLink(c.tel1||c.wpp);
+  const nServ=(DB.demandas||[]).filter(d=>d.profissional===c.nome||d.preposto===c.nome).length;
+  const nConcl=(DB.demandas||[]).filter(d=>(d.profissional===c.nome||d.preposto===c.nome)&&d.status==='Concluída').length;
   setModal('👷 '+c.nome,`
+    <div class="detail-box" style="margin-bottom:12px;display:flex;gap:18px;flex-wrap:wrap">
+      <div><div style="font-size:22px;font-weight:800;color:var(--ouro-claro)">${pad2(nServ)}</div><div style="font-size:11px;color:var(--texto-suave)">serviços atendidos</div></div>
+      <div><div style="font-size:22px;font-weight:800;color:var(--verde-claro)">${pad2(nConcl)}</div><div style="font-size:11px;color:var(--texto-suave)">concluídos</div></div>
+    </div>`+`
     <div class="detail-grid">
       <div class="detail-box"><h4>📞 Contato</h4><div class="detail-list">
         <div class="dl-item"><span>Telefone</span><strong>${esc(c.tel1||'—')}</strong></div>
@@ -1311,7 +1406,8 @@ function verContato(id){
       <div style="font-size:13px;margin-top:4px"><strong>Serviços:</strong> ${esc(c.servicos||'—')}</div>
       ${c.obs?`<div style="font-size:13px;margin-top:8px;color:var(--texto-suave)">📝 ${esc(c.obs)}</div>`:''}
     </div>`,
-    `${wpp?`<a class="btn btn-verde" href="${wpp}" target="_blank">💬 Abrir WhatsApp</a>`:''}
+    `${tel?`<a class="btn" href="${tel}">📞 Ligar</a>`:''}
+     ${wpp?`<a class="btn btn-verde" href="${wpp}" target="_blank">💬 WhatsApp</a>`:''}
      <button class="btn btn-ouro" onclick="openContato(${c.id})">✏️ Editar</button>
      <button class="btn" onclick="closeModal()">Fechar</button>`);
 }
@@ -1502,7 +1598,7 @@ function renderEmpresas(){
   const tb=document.getElementById('tbEmpresas');
   if(!lista.length){tb.innerHTML=`<tr><td colspan="6" class="t-empty">Nenhuma empresa cadastrada.</td></tr>`;return;}
   tb.innerHTML=lista.map(e=>{
-    const wpp=wppLink(e.telefone);
+    const wpp=wppLink(e.telefone); const tel=telLink(e.telefone);
     return`<tr>
       <td><strong>${esc(e.nome)}</strong>${e.cnpj?`<div style="font-size:11px;color:var(--texto-suave)">${esc(e.cnpj)}</div>`:''}</td>
       <td>${esc(e.responsavel||'—')}</td>
@@ -1510,6 +1606,7 @@ function renderEmpresas(){
       <td>${esc(e.cidade||'—')}${e.uf?'/'+esc(e.uf):''}</td>
       <td style="max-width:200px;font-size:12px;color:var(--texto-suave)">${esc(e.servicos||'—')}</td>
       <td><div class="row-actions">
+        ${tel?`<a class="ic-btn call" href="${tel}" title="Ligar">📞</a>`:''}
         ${wpp?`<a class="ic-btn wpp" href="${wpp}" target="_blank" title="WhatsApp">💬</a>`:''}
         <button class="ic-btn edit" onclick="openEmpresa(${e.id})" title="Editar">✏️</button>
         <button class="ic-btn del" onclick="delEmpresa(${e.id})" title="Excluir">🗑️</button>
@@ -1711,43 +1808,63 @@ function preencherFiltrosDem(){
   if(ur.options.length<=1) ur.innerHTML='<option value="">Todas as urgências</option>'+URGENCIAS.map(u=>`<option>${u}</option>`).join('');
 }
 
+let filtroRapidoDem='todas';
+function setFiltroRapido(f){ filtroRapidoDem=f; document.querySelectorAll('#demChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.f===f)); renderDemandas(); }
+function statusRapido(id,novo){
+  const d=DB.demandas.find(x=>x.id===id); if(!d||d.status===novo)return;
+  logDemanda(d,`Status alterado: ${d.status} → ${novo}`); d.status=novo;
+  logAtiv('🔄',`${demandaCod(d)} → ${novo}`); save(); renderDemandas(); toast('Status atualizado.');
+}
 function renderDemandas(){
   preencherFiltrosDem(); updateNavBadges();
   const dem=DB.demandas||[];
+  const hoje0=new Date().toISOString().slice(0,10), mesAtual=hoje0.slice(0,7);
+  const recebidoMes=dem.filter(d=>d.pagamento==='Pago'&&(d.dataRecebimento||'').slice(0,7)===mesAtual).reduce((s,d)=>s+(d.valor||0),0);
+  const aReceber=dem.filter(d=>d.valor&&d.pagamento!=='Pago').reduce((s,d)=>s+(d.valor||0),0);
   const resumo=[
-    ['📥 Recebidas',dem.length,''],
-    ['⏳ Em aberto',dem.filter(demAberta).length,'c-laranja'],
-    ['📤 Sem profissional',dem.filter(d=>demAberta(d)&&!d.profissional&&!d.preposto).length,'c-vermelho'],
-    ['✅ Concluídas',dem.filter(d=>d.status==='Concluída').length,'c-verde'],
-    ['🚨 Emergenciais',dem.filter(d=>demAberta(d)&&d.urgencia==='Emergencial').length,'c-vermelho']
+    ['📥 Recebidas',String(dem.length),''],
+    ['⏳ Em aberto',String(dem.filter(demAberta).length),'c-laranja'],
+    ['📤 Sem profissional',String(dem.filter(d=>demAberta(d)&&!d.profissional&&!d.preposto).length),'c-vermelho'],
+    ['✅ Concluídas',String(dem.filter(d=>d.status==='Concluída').length),'c-verde'],
+    ['💰 Recebido (mês)',fmtValor(recebidoMes),'c-verde'],
+    ['⏳ A receber',fmtValor(aReceber),'c-laranja']
   ];
   document.getElementById('demKpi').innerHTML=resumo.map(([l,v,cls])=>`
-    <div class="card ${cls}"><div class="k-top"><span class="k-lbl">${l}</span></div><div class="k-val">${v}</div></div>`).join('');
+    <div class="card ${cls}"><div class="k-top"><span class="k-lbl">${l}</span></div><div class="k-val" style="font-size:${v.length>7?'17px':'30px'}">${v}</div></div>`).join('');
 
   const q=(document.getElementById('fDemBusca').value||'').toLowerCase();
   const fs=document.getElementById('fDemStatus').value;
   const fc=document.getElementById('fDemCidade').value;
   const fu=document.getElementById('fDemUrg').value;
+  const de=(document.getElementById('fDemDe')||{}).value||'';
+  const ate=(document.getElementById('fDemAte')||{}).value||'';
   let lista=dem.filter(d=>{
     if(fs&&d.status!==fs)return false;
     if(fc&&d.cidade!==fc)return false;
     if(fu&&d.urgencia!==fu)return false;
+    const dia=(d.dataRecebimento||'').slice(0,10);
+    if(de&&dia<de)return false; if(ate&&dia>ate)return false;
+    if(filtroRapidoDem==='aberto'&&!demAberta(d))return false;
+    if(filtroRapidoDem==='hoje'&&!(demAberta(d)&&d.prazo===hoje0))return false;
+    if(filtroRapidoDem==='atrasadas'&&!(demAberta(d)&&d.prazo&&d.prazo<hoje0))return false;
     if(q){const blob=[demandaCod(d),d.empresaSolic,d.solicitante,d.tipoServico,d.descricao,d.cidade,d.endereco,d.rodovia,d.profissional,d.preposto].join(' ').toLowerCase();if(!blob.includes(q))return false;}
     return true;
   }).sort((a,b)=>(b.num||0)-(a.num||0));
 
   const tb=document.getElementById('tbDemandas');
-  if(!lista.length){tb.innerHTML=`<tr><td colspan="8" class="t-empty">Nenhuma demanda encontrada. Clique em “＋ Nova Demanda” para registrar a primeira.</td></tr>`;return;}
+  if(!lista.length){tb.innerHTML=`<tr><td colspan="8" class="t-empty">Nenhuma demanda encontrada.</td></tr>`;return;}
   tb.innerHTML=lista.map(d=>{
     const resp=d.profissional||d.preposto||'<span class="tag tag-vermelho">A designar</span>';
+    const stOpts=STATUS_DEMANDA.map(s=>`<option ${d.status===s?'selected':''}>${s}</option>`).join('');
+    const pagTag=d.valor?`<div style="margin-top:3px"><span class="tag ${d.pagamento==='Pago'?'tag-verde':'tag-laranja'}" style="font-size:10px">${fmtValor(d.valor)}${d.pagamento==='Pago'?' ✓':''}</span></div>`:'';
     return`<tr>
       <td><strong>${demandaCod(d)}</strong></td>
       <td style="font-size:12px">${dataHora(d.dataRecebimento)}</td>
-      <td>${esc(d.tipoServico||'—')}</td>
+      <td>${esc(d.tipoServico||'—')}${pagTag}</td>
       <td>${esc(d.cidade||'—')}${d.uf?'/'+esc(d.uf):''}</td>
       <td><span class="tag ${URG_COR[d.urgencia]||'tag-cinza'}">${esc(d.urgencia||'—')}</span></td>
       <td style="font-size:12.5px">${resp}</td>
-      <td><span class="tag ${STATUS_COR[d.status]||'tag-cinza'}">${esc(d.status)}</span></td>
+      <td><select class="st-select" onchange="statusRapido(${d.id},this.value)" title="Mudar status">${stOpts}</select></td>
       <td><div class="row-actions">
         <button class="ic-btn view" onclick="verDemanda(${d.id})" title="Abrir">👁️</button>
         <button class="ic-btn edit" onclick="openDemanda(${d.id})" title="Editar">✏️</button>
@@ -1758,8 +1875,11 @@ function renderDemandas(){
   }).join('');
 }
 
+function parseValor(s){ if(s==null)return null; s=String(s).trim(); if(!s)return null; s=s.replace(/\./g,'').replace(',','.'); const n=parseFloat(s); return isNaN(n)?null:n; }
+function fmtValor(n){ if(n==null||isNaN(n))return'—'; return 'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function openDemanda(id){
   const d = id?DB.demandas.find(x=>x.id===id):{status:'Nova demanda',urgencia:'Normal'};
+  demFotosTmp=(d.fotos||[]).slice();
   const cidadesOpt='<option value="">—</option>'+DB.cidades.map(ci=>`<option ${d.cidade===ci.nome?'selected':''} data-uf="${ci.uf}">${esc(ci.nome)}</option>`).join('');
   const tiposOpt='<option value="">—</option>'+DB.tiposServico.map(t=>`<option ${d.tipoServico===t?'selected':''}>${esc(t)}</option>`).join('');
   const contatosOpt=n=>'<option value="">—</option>'+DB.contatos.filter(c=>c.situacao==='ativo').map(c=>`<option ${n===c.nome?'selected':''}>${esc(c.nome)}${c.cidade?' ('+esc(c.cidade)+')':''}</option>`).join('');
@@ -1778,19 +1898,28 @@ function openDemanda(id){
       <div class="fld"><label>Prazo para atendimento</label><input type="date" id="d_prazo" value="${esc(d.prazo||'')}"></div>
       <div class="fld"><label>Município</label><select id="d_cidade" onchange="autoUF(this,'d_uf')">${cidadesOpt}</select></div>
       <div class="fld"><label>Estado (UF)</label><input id="d_uf" value="${esc(d.uf||'')}" maxlength="2" style="text-transform:uppercase"></div>
-      <div class="fld full"><label>Endereço / localização</label><input id="d_end" value="${esc(d.endereco||'')}"></div>
+      <div class="fld full"><label>Endereço / localização</label>
+        <div style="display:flex;gap:6px"><input id="d_end" value="${esc(d.endereco||'')}" style="flex:1">
+        <button type="button" class="btn btn-sm" onclick="pegarLocalizacao('d_end','d_geo')" title="Usar minha localização (GPS)">📍 GPS</button></div>
+        <input type="hidden" id="d_geo" value="${esc(d.geo||'')}"></div>
       <div class="fld"><label>Rodovia</label><input id="d_rod" value="${esc(d.rodovia||'')}" placeholder="BR-158 / MT-100"></div>
       <div class="fld"><label>Quilômetro</label><input id="d_km" value="${esc(d.km||'')}" placeholder="km 245"></div>
       <div class="fld"><label>Profissional responsável</label><select id="d_prof">${contatosOpt(d.profissional)}</select></div>
       <div class="fld"><label>Preposto designado</label><select id="d_prep">${contatosOpt(d.preposto)}</select></div>
       <div class="fld"><label>Grupo de apoio</label><select id="d_grupo">${gruposOpt}</select></div>
       <div class="fld"><label>Status da demanda</label><select id="d_status">${statusOpt}</select></div>
+      <div class="fld"><label>Valor do serviço (R$)</label><input id="d_valor" value="${d.valor!=null?String(d.valor).replace('.',','):''}" placeholder="0,00" inputmode="decimal"></div>
+      <div class="fld"><label>Pagamento</label><select id="d_pag">${['A receber','Pago'].map(x=>`<option ${d.pagamento===x?'selected':''}>${x}</option>`).join('')}</select></div>
       <div class="fld full"><label>Anexos / documentos (referências)</label><input id="d_anexos" value="${esc(d.anexos||'')}" placeholder="Ex.: link do Drive, nome do arquivo, protocolo..."></div>
       <div class="fld full"><label>Observações</label><textarea id="d_obs">${esc(d.obs||'')}</textarea></div>
-    </div>
-    <div style="font-size:11.5px;color:var(--texto-suave);margin-top:4px">💡 O envio de fotografias direto na ocorrência entra na Etapa 3 (módulo de vistorias). Por enquanto, registre aqui a referência do arquivo.</div>`,
+      <div class="fld full"><label>Fotografias</label>
+        <div class="foto-grid" id="d_fotos"></div>
+        <input type="file" id="d_fotoInput" accept="image/*" multiple style="display:none" onchange="addFotosDem(event)">
+      </div>
+    </div>`,
     `<button class="btn" onclick="closeModal()">Cancelar</button>
      <button class="btn btn-ouro" onclick="saveDemanda(${id||0})">💾 Salvar</button>`);
+  renderFotosDem();
 }
 
 function saveDemanda(id){
@@ -1804,7 +1933,8 @@ function saveDemanda(id){
     prazo:val('d_prazo'), cidade:val('d_cidade'), uf:val('d_uf').toUpperCase(),
     endereco:val('d_end'), rodovia:val('d_rod'), km:val('d_km'),
     profissional:val('d_prof'), preposto:val('d_prep'), grupoApoio:val('d_grupo'),
-    status:statusNovo, anexos:val('d_anexos'), obs:val('d_obs')
+    status:statusNovo, anexos:val('d_anexos'), obs:val('d_obs'),
+    valor:parseValor(val('d_valor')), pagamento:val('d_pag'), geo:val('d_geo'), fotos:demFotosTmp.slice()
   };
   if(id){
     const statusAntigo=antigo.status;
@@ -1857,6 +1987,7 @@ function verDemanda(id){
         <div class="dl-item"><span>Endereço</span><strong>${esc(d.endereco||'—')}</strong></div>
         <div class="dl-item"><span>Rodovia</span><strong>${esc(d.rodovia||'—')}</strong></div>
         <div class="dl-item"><span>Km</span><strong>${esc(d.km||'—')}</strong></div>
+        ${d.geo?`<div class="dl-item"><span>Mapa</span><a href="${linkMapa(d.geo)}" target="_blank" class="tag tag-azul">📍 Abrir no mapa</a></div>`:''}
       </div></div>
       <div class="detail-box"><h4>🧭 Atendimento</h4><div class="detail-list">
         <div class="dl-item"><span>Urgência</span><span class="tag ${URG_COR[d.urgencia]}">${esc(d.urgencia||'—')}</span></div>
@@ -1864,12 +1995,16 @@ function verDemanda(id){
         <div class="dl-item"><span>Profissional</span><strong>${esc(d.profissional||'—')}</strong></div>
         <div class="dl-item"><span>Preposto</span><strong>${esc(d.preposto||'—')}</strong></div>
         <div class="dl-item"><span>Grupo de apoio</span><strong>${esc(d.grupoApoio||'—')}</strong></div>
+        <div class="dl-item"><span>Valor</span><strong>${fmtValor(d.valor)}</strong></div>
+        <div class="dl-item"><span>Pagamento</span><span class="tag ${d.pagamento==='Pago'?'tag-verde':'tag-laranja'}">${esc(d.pagamento||'A receber')}</span></div>
       </div></div>
     </div>
     ${d.descricao?`<div class="detail-box" style="margin-top:14px"><h4>📝 Descrição</h4><div style="font-size:13px">${esc(d.descricao)}</div>${d.obs?`<div style="font-size:12.5px;color:var(--texto-suave);margin-top:7px">Obs.: ${esc(d.obs)}</div>`:''}${d.anexos?`<div style="font-size:12.5px;margin-top:7px">📎 ${esc(d.anexos)}</div>`:''}</div>`:''}
+    ${(d.fotos&&d.fotos.length)?`<div class="detail-box" style="margin-top:14px"><h4>📷 Fotografias (${d.fotos.length})</h4><div class="foto-grid">${d.fotos.map(f=>`<div class="foto-item"><img src="${f}"></div>`).join('')}</div></div>`:''}
     <div class="detail-box" style="margin-top:14px"><h4>📞 Profissionais acionados</h4><div class="detail-list">${acion}</div></div>
     <div class="panel" style="margin-top:14px"><div class="panel-head"><h3 style="font-size:13px">🕒 Histórico de movimentações</h3></div><div class="panel-body" style="padding:6px 14px"><div class="feed">${hist}</div></div></div>`,
-    `${wppSolic?`<a class="btn btn-verde" href="${wppSolic}" target="_blank">💬 Solicitante</a>`:''}
+    `${telLink(d.telefone)?`<a class="btn" href="${telLink(d.telefone)}">📞 Ligar</a>`:''}
+     ${wppSolic?`<a class="btn btn-verde" href="${wppSolic}" target="_blank">💬 Solicitante</a>`:''}
      <button class="btn btn-ouro" onclick="distribuir(${d.id})">🧭 Encontrar profissionais</button>
      <button class="btn" onclick="mudarStatus(${d.id})">🔄 Status</button>
      <button class="btn" onclick="novaVistoriaDeDemanda(${d.id})">🚚 Vistoria</button>
@@ -1938,6 +2073,7 @@ function distribuir(id){
         </div>
       </div>
       <div style="display:flex;gap:6px;margin-top:9px;flex-wrap:wrap">
+        ${telLink(c.tel1||c.wpp)?`<a class="btn btn-sm" href="${telLink(c.tel1||c.wpp)}">📞 Ligar</a>`:''}
         ${(c.wpp||c.tel1)?`<a class="btn btn-sm btn-verde" href="${wppDemandaLink(d,c)}" target="_blank">💬 Enviar demanda</a>`:''}
         <button class="btn btn-sm btn-ouro" onclick="acionar(${d.id},${c.id},'Profissional')">✔ Acionar como profissional</button>
         <button class="btn btn-sm" onclick="acionar(${d.id},${c.id},'Preposto')">Acionar como preposto</button>
@@ -2059,8 +2195,11 @@ function renderVistorias(){
   preencherFiltroVist();
   const q=(document.getElementById('fVistBusca').value||'').toLowerCase();
   const fc=document.getElementById('fVistCidade').value;
+  const vde=(document.getElementById('fVistDe')||{}).value||'', vate=(document.getElementById('fVistAte')||{}).value||'';
   let lista=(DB.vistorias||[]).filter(v=>{
     if(fc&&v.cidade!==fc)return false;
+    const dia=(v.dataOcorrencia||'').slice(0,10);
+    if(vde&&dia<vde)return false; if(vate&&dia>vate)return false;
     if(q){const b=[vistCod(v),v.placaCavalo,v.placaCarreta,v.motorista,v.transportadora,v.tipoCarga,v.cidade].join(' ').toLowerCase();if(!b.includes(q))return false;}
     return true;
   }).sort((a,b)=>(b.num||0)-(a.num||0));
@@ -2106,7 +2245,10 @@ function openVistoria(id,demandaId){
       <div class="fld"><label>Destino</label><input id="v_dest" value="${g('destino')}"></div>
       <div class="fld"><label>Município</label><select id="v_cidade" onchange="autoUF(this,'v_uf')">${cidadesOpt}</select></div>
       <div class="fld"><label>UF</label><input id="v_uf" value="${g('uf')}" maxlength="2" style="text-transform:uppercase"></div>
-      <div class="fld full"><label>Localização do veículo</label><input id="v_loc" value="${g('localizacao')}"></div>
+      <div class="fld full"><label>Localização do veículo</label>
+        <div style="display:flex;gap:6px"><input id="v_loc" value="${g('localizacao')}" style="flex:1">
+        <button type="button" class="btn btn-sm" onclick="pegarLocalizacao('v_loc','v_geo')" title="Usar minha localização (GPS)">📍 GPS</button></div>
+        <input type="hidden" id="v_geo" value="${esc(v.geo||'')}"></div>
       <div class="fld"><label>Rodovia</label><input id="v_rod" value="${g('rodovia')}"></div>
       <div class="fld"><label>Quilômetro</label><input id="v_km" value="${g('km')}"></div>
       <div class="fld"><label>Data e horário da ocorrência</label><input type="datetime-local" id="v_data" value="${v.dataOcorrencia?toLocalInput(v.dataOcorrencia):''}"></div>
@@ -2135,7 +2277,7 @@ function saveVistoria(id){
     localizacao:val('v_loc'),rodovia:val('v_rod'),km:val('v_km'),
     dataOcorrencia:val('v_data')?new Date(val('v_data')).toISOString():'',
     tipoAcidente:val('v_tipoac'),situacaoVeiculo:val('v_sit'),danosAmbientais:val('v_dano'),vitimas:val('v_vit'),
-    equipes:val('v_eq'),relatorio:val('v_rel'),fotos:vistFotosTmp.slice(),
+    equipes:val('v_eq'),relatorio:val('v_rel'),fotos:vistFotosTmp.slice(),geo:val('v_geo'),
     demandaId:val('v_demandaId')?parseInt(val('v_demandaId')):null
   };
   if(id){const old=DB.vistorias.find(x=>x.id===id);obj.checklist=old.checklist||{};obj.checklistNota=old.checklistNota||'';obj.num=old.num;Object.assign(old,obj);logAtiv('✏️',`Vistoria ${vistCod(old)} atualizada`);}
@@ -2187,7 +2329,8 @@ function verVistoria(id){
       <div class="progress"><div class="bar" style="width:${p.pct}%"></div></div>
       <div style="font-size:12px;color:var(--texto-suave);margin-top:4px">${p.feito}/${p.tot} itens preenchidos</div></div>
     <div class="detail-box" style="margin-top:14px"><h4>📷 Fotografias (${(v.fotos||[]).length})</h4>${fotos}</div>`,
-    `${wppMot?`<a class="btn btn-verde" href="${wppMot}" target="_blank">💬 Motorista</a>`:''}
+    `${telLink(v.telMotorista)?`<a class="btn" href="${telLink(v.telMotorista)}">📞 Ligar</a>`:''}
+     ${wppMot?`<a class="btn btn-verde" href="${wppMot}" target="_blank">💬 Motorista</a>`:''}
      <button class="btn btn-ouro" onclick="abrirChecklist(${v.id})">✅ Checklist</button>
      <button class="btn" onclick="gerarRelatorioVistoria(${v.id})">📄 Relatório</button>
      <button class="btn" onclick="openVistoria(${v.id})">✏️ Editar</button>
@@ -2255,7 +2398,7 @@ function repHeader(titulo,sub){
 function repFooter(){
   const e=DB.emitente||{};
   const partes=[e.nome,e.telefone,e.email,e.cidade].filter(Boolean).join(' • ');
-  return `<div class="rep-footer">${esc(partes||'Rede Nacional de Vistoriadores e Reguladoras do Brasil')}</div>`;
+  return `<div class="rep-footer"><strong>Rede Nacional de Vistoriadores e Reguladoras do Brasil</strong>${partes?'<br>'+esc(partes):''}</div>`;
 }
 function repSecao(titulo,rows){
   return `<div class="rep-sec"><h3>${esc(titulo)}</h3><table class="rep-tbl">${rows.map(([k,v])=>`<tr><td class="k">${esc(k)}</td><td>${esc(v||'—')}</td></tr>`).join('')}</table></div>`;
@@ -2291,8 +2434,10 @@ function montarRelDemanda(id,tipo){
     sec=repSecao('Identificação da ocorrência',[['Código',demandaCod(d)],['Tipo de serviço',d.tipoServico],['Urgência',d.urgencia],['Recebida em',dataHora(d.dataRecebimento)],['Prazo',d.prazo?new Date(d.prazo+'T00:00').toLocaleDateString('pt-BR'):'—'],['Status',d.status]])
       +repSecao('Solicitante',[['Empresa',d.empresaSolic],['Contato',d.solicitante],['Telefone',d.telefone]])
       +repSecao('Localização',[['Município',(d.cidade||'')+'/'+(d.uf||'')],['Endereço',d.endereco],['Rodovia',d.rodovia],['Km',d.km]])
-      +repSecao('Atendimento',[['Profissional responsável',d.profissional],['Preposto',d.preposto],['Grupo de apoio',d.grupoApoio]]);
+      +repSecao('Atendimento',[['Profissional responsável',d.profissional],['Preposto',d.preposto],['Grupo de apoio',d.grupoApoio]])
+      +repSecao('Financeiro',[['Valor do serviço',fmtValor(d.valor)],['Pagamento',d.pagamento||'A receber']]);
     if(d.descricao) sec+=`<div class="rep-sec"><h3>Descrição / fatos</h3><div style="font-size:12px">${esc(d.descricao)}</div>${d.obs?`<div style="font-size:12px;margin-top:6px"><strong>Observações:</strong> ${esc(d.obs)}</div>`:''}</div>`;
+    if(d.fotos&&d.fotos.length) sec+=`<div class="rep-sec"><h3>Registro fotográfico (${d.fotos.length})</h3><div class="rep-fotos">${d.fotos.map(f=>`<img src="${f}">`).join('')}</div></div>`;
   }
   return repHeader(tipo,demandaCod(d))+sec+repFooter();
 }
