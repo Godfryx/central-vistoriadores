@@ -377,6 +377,16 @@ tbody tr:last-child td{border-bottom:none}
   @page{margin:14mm 12mm}
 }
 
+/* Login */
+#loginOverlay{position:fixed;inset:0;z-index:5000;background:linear-gradient(160deg,#0d0f12,#161b22);display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{background:var(--grafite);border:1px solid var(--borda);border-radius:16px;padding:30px 26px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.login-emblema{width:66px;height:66px;border-radius:50%;background:radial-gradient(circle at 50% 38%,#20262e,#0c0e11);border:3px solid var(--ouro);display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px}
+.login-box h2{font-size:19px;color:var(--branco);font-weight:800}
+.login-box>p{font-size:12px;color:var(--texto-suave);margin:4px 0 18px}
+.login-box .fld{text-align:left;margin-bottom:12px}
+.login-msg{font-size:12.5px;color:#ec8079;min-height:18px;margin-bottom:10px}
+.login-rodape{font-size:11px;color:var(--texto-suave);margin-top:16px;line-height:1.4}
+
 /* Status da nuvem */
 .nuvem{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:20px;border:1px solid var(--borda);background:var(--grafite3);color:var(--texto-suave);white-space:nowrap;cursor:pointer}
 .nuvem.ok{color:var(--verde-claro);border-color:rgba(31,157,77,.4);background:rgba(31,157,77,.12)}
@@ -452,7 +462,7 @@ tbody tr:last-child td{border-bottom:none}
         <span class="si">🔎</span>
         <input type="text" id="globalSearch" placeholder="Buscar contato, cidade...">
       </div>
-      <div class="user-chip">
+      <div class="user-chip" onclick="confirmarLogout()" style="cursor:pointer" title="Clique para sair">
         <div class="av">V</div>
         <div><div class="un">Vistoriador</div><div class="ur">Central Operacional</div></div>
       </div>
@@ -744,6 +754,20 @@ tbody tr:last-child td{border-bottom:none}
 <div class="toast-wrap" id="toastWrap"></div>
 <div id="printArea"></div>
 
+<!-- ===================== LOGIN ===================== -->
+<div id="loginOverlay" style="display:none">
+  <div class="login-box">
+    <div class="login-emblema">🚚</div>
+    <h2>Central Operacional</h2>
+    <p>Rede Nacional de Vistoriadores e Reguladoras do Brasil</p>
+    <div class="fld"><label>E-mail</label><input id="login_email" type="email" autocomplete="username" placeholder="seu@email.com"></div>
+    <div class="fld"><label>Senha</label><input id="login_senha" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')fazerLogin()"></div>
+    <div id="login_msg" class="login-msg"></div>
+    <button class="btn btn-ouro" style="width:100%;justify-content:center;padding:11px" onclick="fazerLogin()">Entrar</button>
+    <div class="login-rodape">Acesso restrito à equipe. Para criar um acesso, fale com o responsável.</div>
+  </div>
+</div>
+
 <script>
 /* Mostra qualquer erro de inicialização na própria tela (para diagnóstico). */
 window.onerror=function(msg,src,line){
@@ -768,8 +792,10 @@ const SB_URL='https://mjlnanhrgteugkpqttnn.supabase.co';
 const SB_KEY='sb_publishable_atgproWLAKqudbP3qCqaYw_NLHx9MKe';
 const SB_ON=!!(SB_URL&&SB_KEY);
 const SB_ROW='principal';
+const AUTH_KEY='rede_auth_v1';
 let paginaAtual='dashboard';
 let nuvemOK=false, salvarTimer=null, ultimaNuvem=0, nuvemErro='';
+let authToken=null, authRefresh=null, authEmail='';
 const UF_LIST = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
 
 /* ---------- Estado ---------- */
@@ -819,14 +845,53 @@ function load(){
   return false;
 }
 /* ---- Sincronização com a nuvem (Supabase REST) ---- */
-function sbHeaders(extra){ return Object.assign({'apikey':SB_KEY,'Content-Type':'application/json'}, extra||{}); }
+function sbHeaders(extra){ const h={'apikey':SB_KEY,'Content-Type':'application/json'}; if(authToken) h['Authorization']='Bearer '+authToken; return Object.assign(h, extra||{}); }
 function modalAberto(){ const m=document.getElementById('modalBg'); return m && m.classList.contains('open'); }
 function agendarNuvemSalvar(){ if(!SB_ON) return; clearTimeout(salvarTimer); salvarTimer=setTimeout(()=>{ nuvemSalvar().then(atualizarStatusNuvem); }, 900); }
-async function sbFetch(url,opts){
+async function sbFetch(url,opts,jaTentou){
   const r=await fetch(url,opts);
+  if(r.status===401){
+    if(!jaTentou && authRefresh && await renovarToken()){
+      const o2=Object.assign({},opts);
+      if(o2.headers){ const h=Object.assign({},o2.headers); if(authToken) h['Authorization']='Bearer '+authToken; o2.headers=h; }
+      return sbFetch(url,o2,true);
+    }
+    precisaRelogar();
+  }
   if(!r.ok){ let t=''; try{ t=await r.text(); }catch(_){} throw new Error('HTTP '+r.status+(t?(' — '+t.slice(0,180)):'')); }
   return r;
 }
+/* ---- Login (Supabase Auth) ---- */
+function salvarAuth(){ try{ localStorage.setItem(AUTH_KEY, JSON.stringify({token:authToken,refresh:authRefresh,email:authEmail})); }catch(e){} }
+function carregarAuth(){ try{ const d=JSON.parse(localStorage.getItem(AUTH_KEY)||'null'); if(d&&d.token){ authToken=d.token; authRefresh=d.refresh; authEmail=d.email||''; return true; } }catch(e){} return false; }
+async function renovarToken(){
+  if(!authRefresh) return false;
+  try{
+    const r=await fetch(SB_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:authRefresh})});
+    if(!r.ok) return false;
+    const d=await r.json(); authToken=d.access_token; authRefresh=d.refresh_token; salvarAuth(); return true;
+  }catch(e){ return false; }
+}
+async function fazerLogin(){
+  const email=(val('login_email')||'').trim(), senha=val('login_senha')||'';
+  const msg=document.getElementById('login_msg');
+  if(!email||!senha){ if(msg)msg.textContent='Informe e-mail e senha.'; return; }
+  if(msg)msg.textContent='Entrando...';
+  try{
+    const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,password:senha})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){ if(msg)msg.textContent=(d.error_description||d.msg||d.message||'E-mail ou senha incorretos.'); return; }
+    authToken=d.access_token; authRefresh=d.refresh_token; authEmail=(d.user&&d.user.email)||email; salvarAuth();
+    const ov=document.getElementById('loginOverlay'); if(ov) ov.style.display='none';
+    iniciarApp();
+  }catch(e){ if(msg)msg.textContent='Erro de conexão. Verifique a internet e tente de novo.'; }
+}
+function precisaRelogar(){
+  authToken=null; try{ localStorage.removeItem(AUTH_KEY); }catch(e){}
+  const o=document.getElementById('loginOverlay'); if(o){ o.style.display='flex'; const m=document.getElementById('login_msg'); if(m) m.textContent='Sua sessão expirou. Entre novamente.'; }
+}
+function logout(){ authToken=null; authRefresh=null; authEmail=''; try{ localStorage.removeItem(AUTH_KEY); }catch(e){} location.reload(); }
+function confirmarLogout(){ if(!SB_ON||!authToken) return; confirmar('Deseja sair da sua conta? Os dados ficam salvos na nuvem.', logout); }
 async function nuvemCarregar(){
   if(!SB_ON) return false;
   try{
@@ -2279,22 +2344,31 @@ function normalizeEstrutura(){
   DB.seq.demanda=Math.max(DB.seq.demanda,(DB.demandas.reduce((m,d)=>Math.max(m,d.num||d.id||0),0))+1);
   DB.seq.vistoria=Math.max(DB.seq.vistoria,(DB.vistorias.reduce((m,v)=>Math.max(m,v.num||v.id||0),0))+1);
 }
-(async function init(){
+function iniciarApp(){
   try{ if(!load()) seedInicial(true); }
   catch(e){ try{ seedInicial(true); }catch(_){ DB=DB||{}; } }
   normalizeEstrutura();
   try{ updateNavBadges(); }catch(e){}
+  if(authEmail){ const un=document.querySelector('.user-chip .un'); const av=document.querySelector('.user-chip .av'); if(un)un.textContent=authEmail.split('@')[0]; if(av)av.textContent=(authEmail[0]||'V').toUpperCase(); }
   goTo('dashboard');
   // Nuvem: carrega o que já existe; se estiver vazia, envia a base atual. Depois sincroniza sozinho.
   if(SB_ON){
     atualizarStatusNuvem();
-    let veio=false;
-    try{ veio=await nuvemCarregar(); }catch(e){}
-    if(veio){ normalizeEstrutura(); try{ localStorage.setItem(DB_KEY,JSON.stringify(DB)); }catch(e){} try{ updateNavBadges(); }catch(e){} goTo(paginaAtual); }
-    else { try{ await nuvemSalvar(); }catch(e){} }
-    atualizarStatusNuvem();
-    setInterval(nuvemPoll, 15000);
+    (async()=>{
+      let veio=false;
+      try{ veio=await nuvemCarregar(); }catch(e){}
+      if(veio){ normalizeEstrutura(); try{ localStorage.setItem(DB_KEY,JSON.stringify(DB)); }catch(e){} try{ updateNavBadges(); }catch(e){} goTo(paginaAtual); }
+      else { try{ await nuvemSalvar(); }catch(e){} }
+      atualizarStatusNuvem();
+      setInterval(nuvemPoll, 15000);
+    })();
   }
+}
+(function init(){
+  if(SB_ON){
+    if(carregarAuth()){ const o=document.getElementById('loginOverlay'); if(o)o.style.display='none'; iniciarApp(); }
+    else { const o=document.getElementById('loginOverlay'); if(o)o.style.display='flex'; }
+  } else { iniciarApp(); }
 })();
 </script>
 </body>
