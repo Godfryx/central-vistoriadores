@@ -386,6 +386,8 @@ tbody tr:last-child td{border-bottom:none}
 .login-box .fld{text-align:left;margin-bottom:12px}
 .login-msg{font-size:12.5px;color:#ec8079;min-height:18px;margin-bottom:10px}
 .login-rodape{font-size:11px;color:var(--texto-suave);margin-top:16px;line-height:1.4}
+.login-link{font-size:12.5px;color:var(--ouro-claro);margin-top:13px;cursor:pointer;display:inline-block}
+.login-link:hover{text-decoration:underline}
 
 /* Status da nuvem */
 .nuvem{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:20px;border:1px solid var(--borda);background:var(--grafite3);color:var(--texto-suave);white-space:nowrap;cursor:pointer}
@@ -760,10 +762,34 @@ tbody tr:last-child td{border-bottom:none}
     <div class="login-emblema">🚚</div>
     <h2>Central Operacional</h2>
     <p>Rede Nacional de Vistoriadores e Reguladoras do Brasil</p>
-    <div class="fld"><label>E-mail</label><input id="login_email" type="email" autocomplete="username" placeholder="seu@email.com"></div>
-    <div class="fld"><label>Senha</label><input id="login_senha" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')fazerLogin()"></div>
-    <div id="login_msg" class="login-msg"></div>
-    <button class="btn btn-ouro" style="width:100%;justify-content:center;padding:11px" onclick="fazerLogin()">Entrar</button>
+
+    <!-- Entrar -->
+    <div id="view_login">
+      <div class="fld"><label>E-mail</label><input id="login_email" type="email" autocomplete="username" placeholder="seu@email.com"></div>
+      <div class="fld"><label>Senha</label><input id="login_senha" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')fazerLogin()"></div>
+      <div id="login_msg" class="login-msg"></div>
+      <button class="btn btn-ouro" style="width:100%;justify-content:center;padding:11px" onclick="fazerLogin()">Entrar</button>
+      <div class="login-link" onclick="mostrarView('recover')">Esqueci minha senha</div>
+    </div>
+
+    <!-- Recuperar senha -->
+    <div id="view_recover" style="display:none">
+      <p style="font-size:12.5px;color:var(--texto-suave);margin-bottom:12px">Digite seu e-mail. Enviaremos um link para você criar uma nova senha.</p>
+      <div class="fld"><label>E-mail</label><input id="rec_email" type="email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')enviarRecuperacao()"></div>
+      <div id="rec_msg" class="login-msg"></div>
+      <button class="btn btn-ouro" style="width:100%;justify-content:center;padding:11px" onclick="enviarRecuperacao()">Enviar link</button>
+      <div class="login-link" onclick="mostrarView('login')">← Voltar ao login</div>
+    </div>
+
+    <!-- Nova senha (primeiro acesso ou recuperação) -->
+    <div id="view_novasenha" style="display:none">
+      <p id="novasenha_titulo" style="font-size:13px;color:var(--ouro-claro);margin-bottom:12px;font-weight:700">Defina a sua senha</p>
+      <div class="fld"><label>Nova senha (mín. 6 caracteres)</label><input id="ns_senha" type="password"></div>
+      <div class="fld"><label>Repita a nova senha</label><input id="ns_senha2" type="password" onkeydown="if(event.key==='Enter')salvarNovaSenha()"></div>
+      <div id="ns_msg" class="login-msg"></div>
+      <button class="btn btn-ouro" style="width:100%;justify-content:center;padding:11px" onclick="salvarNovaSenha()">Salvar senha</button>
+    </div>
+
     <div class="login-rodape">Acesso restrito à equipe. Para criar um acesso, fale com o responsável.</div>
   </div>
 </div>
@@ -795,7 +821,7 @@ const SB_ROW='principal';
 const AUTH_KEY='rede_auth_v1';
 let paginaAtual='dashboard';
 let nuvemOK=false, salvarTimer=null, ultimaNuvem=0, nuvemErro='';
-let authToken=null, authRefresh=null, authEmail='';
+let authToken=null, authRefresh=null, authEmail='', modoNovaSenha='';
 const UF_LIST = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
 
 /* ---------- Estado ---------- */
@@ -872,6 +898,9 @@ async function renovarToken(){
     const d=await r.json(); authToken=d.access_token; authRefresh=d.refresh_token; salvarAuth(); return true;
   }catch(e){ return false; }
 }
+function mostrarView(v){
+  ['login','recover','novasenha'].forEach(x=>{ const el=document.getElementById('view_'+x); if(el) el.style.display=(x===v)?'block':'none'; });
+}
 async function fazerLogin(){
   const email=(val('login_email')||'').trim(), senha=val('login_senha')||'';
   const msg=document.getElementById('login_msg');
@@ -882,9 +911,50 @@ async function fazerLogin(){
     const d=await r.json().catch(()=>({}));
     if(!r.ok){ if(msg)msg.textContent=(d.error_description||d.msg||d.message||'E-mail ou senha incorretos.'); return; }
     authToken=d.access_token; authRefresh=d.refresh_token; authEmail=(d.user&&d.user.email)||email; salvarAuth();
+    const meta=(d.user&&d.user.user_metadata)||{};
+    if(meta.senha_definida!==true){
+      modoNovaSenha='primeiro';
+      const t=document.getElementById('novasenha_titulo'); if(t)t.textContent='Primeiro acesso: crie a sua senha pessoal';
+      mostrarView('novasenha'); return;
+    }
     const ov=document.getElementById('loginOverlay'); if(ov) ov.style.display='none';
     iniciarApp();
   }catch(e){ if(msg)msg.textContent='Erro de conexão. Verifique a internet e tente de novo.'; }
+}
+async function enviarRecuperacao(){
+  const email=(val('rec_email')||'').trim(); const msg=document.getElementById('rec_msg');
+  if(!email){ if(msg){msg.style.color='#ec8079';msg.textContent='Informe seu e-mail.';} return; }
+  if(msg){ msg.style.color='var(--texto-suave)'; msg.textContent='Enviando...'; }
+  try{
+    const redir=location.origin+location.pathname;
+    const r=await fetch(SB_URL+'/auth/v1/recover?redirect_to='+encodeURIComponent(redir),{method:'POST',headers:{'apikey':SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email})});
+    if(!r.ok){ const d=await r.json().catch(()=>({})); if(msg){msg.style.color='#ec8079';msg.textContent=(d.msg||d.error_description||'Não consegui enviar. Verifique o e-mail.');} return; }
+    if(msg){ msg.style.color='var(--verde-claro)'; msg.textContent='Link enviado! Verifique seu e-mail (veja também o spam/lixo eletrônico).'; }
+  }catch(e){ if(msg){msg.style.color='#ec8079';msg.textContent='Erro de conexão.';} }
+}
+function checarHashRecuperacao(){
+  const h=location.hash||''; if(h.indexOf('type=recovery')<0) return false;
+  const params=new URLSearchParams(h.replace(/^#/,''));
+  const at=params.get('access_token');
+  if(at){ authToken=at; authRefresh=params.get('refresh_token')||null; modoNovaSenha='recuperacao';
+    try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){}
+    return true; }
+  return false;
+}
+async function salvarNovaSenha(){
+  const s1=val('ns_senha')||'', s2=val('ns_senha2')||''; const msg=document.getElementById('ns_msg');
+  if(s1.length<6){ if(msg){msg.style.color='#ec8079';msg.textContent='A senha precisa ter pelo menos 6 caracteres.';} return; }
+  if(s1!==s2){ if(msg){msg.style.color='#ec8079';msg.textContent='As senhas não são iguais.';} return; }
+  if(msg){ msg.style.color='var(--texto-suave)'; msg.textContent='Salvando...'; }
+  try{
+    const r=await fetch(SB_URL+'/auth/v1/user',{method:'PUT',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+authToken,'Content-Type':'application/json'},body:JSON.stringify({password:s1,data:{senha_definida:true}})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){ if(msg){msg.style.color='#ec8079';msg.textContent=(d.msg||d.error_description||'Não consegui salvar a senha.');} return; }
+    authEmail=d.email||authEmail; salvarAuth();
+    const ov=document.getElementById('loginOverlay'); if(ov) ov.style.display='none';
+    toast('Senha definida com sucesso!');
+    iniciarApp();
+  }catch(e){ if(msg){msg.style.color='#ec8079';msg.textContent='Erro de conexão.';} }
 }
 function precisaRelogar(){
   authToken=null; try{ localStorage.removeItem(AUTH_KEY); }catch(e){}
@@ -2366,8 +2436,10 @@ function iniciarApp(){
 }
 (function init(){
   if(SB_ON){
-    if(carregarAuth()){ const o=document.getElementById('loginOverlay'); if(o)o.style.display='none'; iniciarApp(); }
-    else { const o=document.getElementById('loginOverlay'); if(o)o.style.display='flex'; }
+    const o=document.getElementById('loginOverlay');
+    if(checarHashRecuperacao()){ if(o)o.style.display='flex'; const t=document.getElementById('novasenha_titulo'); if(t)t.textContent='Crie uma nova senha'; mostrarView('novasenha'); return; }
+    if(carregarAuth()){ if(o)o.style.display='none'; iniciarApp(); }
+    else { if(o)o.style.display='flex'; mostrarView('login'); }
   } else { iniciarApp(); }
 })();
 </script>
