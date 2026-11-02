@@ -1,0 +1,2301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Central Operacional — Rede Nacional de Vistoriadores e Reguladoras do Brasil</title>
+<style>
+/* ===================== IDENTIDADE VISUAL =====================
+   Rede Nacional de Vistoriadores e Reguladoras do Brasil
+   Paleta: grafite/preto + dourado (destaque) + verde (apoio)
+   ============================================================ */
+:root{
+  --preto:#0d0f12;
+  --grafite:#15181d;
+  --grafite2:#1d222a;
+  --grafite3:#272d37;
+  --borda:#333b47;
+  --ouro:#e8b530;
+  --ouro-claro:#f6d268;
+  --ouro-escuro:#b8860b;
+  --verde:#1f9d4d;
+  --verde-claro:#2fcc6a;
+  --azul:#2b6fb8;
+  --vermelho:#d8463c;
+  --laranja:#e08b2a;
+  --texto:#eef1f5;
+  --texto-suave:#9aa5b3;
+  --branco:#ffffff;
+  --sombra:0 4px 18px rgba(0,0,0,.35);
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;
+  background:var(--preto);
+  color:var(--texto);
+  font-size:15px;
+  line-height:1.45;
+}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
+a{color:var(--ouro);text-decoration:none}
+
+/* ===================== LAYOUT GERAL ===================== */
+.app{display:flex;min-height:100vh}
+
+/* ----- MENU LATERAL ----- */
+.sidebar{
+  width:256px;background:linear-gradient(180deg,#111418,#0b0d10);
+  border-right:1px solid var(--borda);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;bottom:0;left:0;z-index:50;
+  transition:transform .25s ease;
+}
+.brand{
+  padding:18px 16px 14px;border-bottom:1px solid var(--borda);
+  display:flex;align-items:center;gap:12px;
+}
+.brand .emblema{flex:none}
+.brand-txt{line-height:1.1}
+.brand-txt .t1{font-size:12.5px;font-weight:800;color:var(--ouro);letter-spacing:.3px}
+.brand-txt .t2{font-size:10.5px;color:var(--texto-suave);margin-top:2px}
+
+/* Emblema recriado em CSS (brasão da rede) */
+.emblema{
+  width:52px;height:52px;border-radius:50%;
+  background:radial-gradient(circle at 50% 38%,#20262e,#0c0e11);
+  border:3px solid var(--ouro);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 2px #000, var(--sombra);position:relative;overflow:hidden;
+}
+.emblema::after{content:"";position:absolute;left:0;right:0;bottom:0;height:40%;
+  background:linear-gradient(180deg,transparent,rgba(232,181,48,.12))}
+.emblema .ico{font-size:24px;line-height:1;z-index:2}
+
+.nav{flex:1;overflow-y:auto;padding:10px 8px}
+.nav-sec{font-size:10px;text-transform:uppercase;letter-spacing:1px;
+  color:#5f6b7a;margin:14px 10px 6px;font-weight:700}
+.nav a{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 12px;border-radius:9px;color:var(--texto-suave);
+  font-size:14px;font-weight:500;margin-bottom:2px;transition:.12s;
+}
+.nav a .ni{width:20px;text-align:center;font-size:16px}
+.nav a:hover{background:var(--grafite2);color:var(--texto)}
+.nav a.active{background:linear-gradient(90deg,rgba(232,181,48,.18),rgba(232,181,48,.04));
+  color:var(--ouro-claro);font-weight:700;border-left:3px solid var(--ouro);padding-left:9px}
+.nav a .badge{margin-left:auto;background:var(--vermelho);color:#fff;
+  font-size:10px;font-weight:700;border-radius:20px;padding:1px 7px;min-width:18px;text-align:center}
+
+/* ----- CONTEÚDO ----- */
+.main{flex:1;margin-left:256px;display:flex;flex-direction:column;min-width:0}
+.topbar{
+  background:var(--grafite);border-bottom:1px solid var(--borda);
+  padding:12px 22px;display:flex;align-items:center;gap:16px;
+  position:sticky;top:0;z-index:40;
+}
+.btn-menu{display:none;background:var(--grafite3);border:1px solid var(--borda);
+  color:var(--texto);width:40px;height:40px;border-radius:9px;font-size:18px}
+.topbar .page-title{font-size:18px;font-weight:800;color:var(--branco)}
+.topbar .page-sub{font-size:12px;color:var(--texto-suave)}
+.topbar .spacer{flex:1}
+.search-top{position:relative}
+.search-top input{
+  background:var(--preto);border:1px solid var(--borda);color:var(--texto);
+  border-radius:20px;padding:9px 14px 9px 36px;width:240px;font-size:13.5px;
+}
+.search-top .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--texto-suave)}
+.user-chip{display:flex;align-items:center;gap:9px;background:var(--grafite3);
+  padding:6px 12px 6px 6px;border-radius:30px;border:1px solid var(--borda)}
+.user-chip .av{width:30px;height:30px;border-radius:50%;background:var(--ouro);
+  color:#111;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+.user-chip .un{font-size:12.5px;font-weight:600;line-height:1.1}
+.user-chip .ur{font-size:10.5px;color:var(--texto-suave)}
+
+.content{padding:22px;flex:1}
+
+/* ===================== COMPONENTES ===================== */
+.page{display:none;animation:fade .25s ease}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.card{
+  background:linear-gradient(145deg,var(--grafite2),var(--grafite));
+  border:1px solid var(--borda);border-radius:var(--radius);
+  padding:16px 16px 14px;position:relative;overflow:hidden;
+}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ouro)}
+.card.c-verde::before{background:var(--verde)}
+.card.c-azul::before{background:var(--azul)}
+.card.c-laranja::before{background:var(--laranja)}
+.card.c-vermelho::before{background:var(--vermelho)}
+.card .k-top{display:flex;justify-content:space-between;align-items:flex-start}
+.card .k-ico{font-size:22px;opacity:.9}
+.card .k-val{font-size:30px;font-weight:800;color:var(--branco);margin:6px 0 2px;line-height:1}
+.card .k-lbl{font-size:12.5px;color:var(--texto-suave);font-weight:500}
+
+.panel{
+  background:var(--grafite);border:1px solid var(--borda);
+  border-radius:var(--radius);margin-top:18px;overflow:hidden;
+}
+.panel-head{padding:14px 18px;border-bottom:1px solid var(--borda);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-head h3{font-size:15px;font-weight:700;color:var(--branco);display:flex;align-items:center;gap:8px}
+.panel-head .spacer{flex:1}
+.panel-body{padding:16px 18px}
+
+/* Botões */
+.btn{
+  background:var(--grafite3);border:1px solid var(--borda);color:var(--texto);
+  padding:9px 15px;border-radius:9px;font-size:13.5px;font-weight:600;
+  display:inline-flex;align-items:center;gap:7px;transition:.12s;
+}
+.btn:hover{background:#30374280;border-color:#47515f}
+.btn-ouro{background:linear-gradient(145deg,var(--ouro),var(--ouro-escuro));
+  color:#1a1205;border-color:var(--ouro-escuro);font-weight:800}
+.btn-ouro:hover{filter:brightness(1.07)}
+.btn-verde{background:var(--verde);border-color:#157a3a;color:#fff}
+.btn-verde:hover{filter:brightness(1.08)}
+.btn-vermelho{background:transparent;border-color:#6e2b27;color:#e88a83}
+.btn-vermelho:hover{background:#2a1513}
+.btn-sm{padding:6px 10px;font-size:12px;border-radius:7px}
+.btn-icon{padding:6px 9px;font-size:13px}
+
+/* Tabelas */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+thead th{
+  background:var(--grafite2);color:var(--texto-suave);text-align:left;
+  padding:11px 14px;font-weight:700;font-size:11.5px;text-transform:uppercase;
+  letter-spacing:.5px;border-bottom:1px solid var(--borda);white-space:nowrap;
+}
+tbody td{padding:11px 14px;border-bottom:1px solid #22272f;vertical-align:middle}
+tbody tr:hover{background:#1a1f26}
+tbody tr:last-child td{border-bottom:none}
+.t-empty{text-align:center;color:var(--texto-suave);padding:34px 14px;font-style:italic}
+
+/* Badges/tags */
+.tag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;
+  font-weight:700;background:var(--grafite3);color:var(--texto-suave);border:1px solid var(--borda);white-space:nowrap}
+.tag-verde{background:rgba(31,157,77,.16);color:var(--verde-claro);border-color:rgba(31,157,77,.3)}
+.tag-ouro{background:rgba(232,181,48,.16);color:var(--ouro-claro);border-color:rgba(232,181,48,.3)}
+.tag-azul{background:rgba(43,111,184,.18);color:#6ba7e0;border-color:rgba(43,111,184,.35)}
+.tag-vermelho{background:rgba(216,70,60,.16);color:#ec8079;border-color:rgba(216,70,60,.3)}
+.tag-cinza{background:#2a2f38;color:#8b96a5}
+.tag-laranja{background:rgba(224,139,42,.16);color:#efa958;border-color:rgba(224,139,42,.3)}
+
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+
+/* Filtros */
+.filters{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.filters select,.filters input{
+  background:var(--preto);border:1px solid var(--borda);color:var(--texto);
+  padding:8px 11px;border-radius:8px;font-size:13px;max-width:200px;
+}
+.filters input{min-width:180px}
+
+/* Ações linha */
+.row-actions{display:flex;gap:5px;justify-content:flex-end}
+.ic-btn{width:30px;height:30px;border-radius:7px;border:1px solid var(--borda);
+  background:var(--grafite3);color:var(--texto-suave);display:inline-flex;
+  align-items:center;justify-content:center;font-size:13px;transition:.12s}
+.ic-btn:hover{color:var(--texto);border-color:#4a5563}
+.ic-btn.wpp:hover{background:#1f9d4d;color:#fff;border-color:#1f9d4d}
+.ic-btn.edit:hover{background:var(--azul);color:#fff;border-color:var(--azul)}
+.ic-btn.del:hover{background:var(--vermelho);color:#fff;border-color:var(--vermelho)}
+.ic-btn.view:hover{background:var(--ouro);color:#111;border-color:var(--ouro)}
+
+/* ===================== MODAL ===================== */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.66);backdrop-filter:blur(2px);
+  display:none;align-items:flex-start;justify-content:center;z-index:100;
+  padding:30px 14px;overflow-y:auto;
+}
+.modal-bg.open{display:flex}
+.modal{
+  background:var(--grafite);border:1px solid var(--borda);border-radius:14px;
+  width:100%;max-width:640px;box-shadow:0 20px 60px rgba(0,0,0,.6);
+  margin:auto;animation:pop .2s ease;
+}
+.modal.wide{max-width:860px}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--borda);
+  display:flex;align-items:center;gap:10px}
+.modal-head h3{font-size:16px;font-weight:800;color:var(--branco);flex:1}
+.modal-head .x{background:none;border:none;color:var(--texto-suave);font-size:24px;line-height:1}
+.modal-head .x:hover{color:var(--texto)}
+.modal-body{padding:18px 20px;max-height:66vh;overflow-y:auto}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--borda);
+  display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+
+/* Formulário */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.form-grid .full{grid-column:1/-1}
+.fld label{display:block;font-size:12px;font-weight:600;color:var(--texto-suave);
+  margin-bottom:5px}
+.fld label .req{color:var(--ouro)}
+.fld input,.fld select,.fld textarea{
+  width:100%;background:var(--preto);border:1px solid var(--borda);
+  color:var(--texto);padding:9px 11px;border-radius:8px;font-size:13.5px;
+}
+.fld input:focus,.fld select:focus,.fld textarea:focus{
+  outline:none;border-color:var(--ouro);box-shadow:0 0 0 2px rgba(232,181,48,.15)}
+.fld textarea{resize:vertical;min-height:62px}
+.checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:3px}
+.chk{display:flex;align-items:center;gap:6px;background:var(--preto);
+  border:1px solid var(--borda);border-radius:7px;padding:7px 11px;font-size:12.5px;cursor:pointer}
+.chk input{width:auto}
+.chk.on{border-color:var(--ouro);background:rgba(232,181,48,.1);color:var(--ouro-claro)}
+
+/* Atividades / alertas */
+.feed{display:flex;flex-direction:column;gap:2px}
+.feed-item{display:flex;gap:12px;padding:11px 4px;border-bottom:1px solid #22272f}
+.feed-item:last-child{border-bottom:none}
+.feed-dot{width:34px;height:34px;border-radius:9px;background:var(--grafite3);
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+.feed-txt{flex:1;min-width:0}
+.feed-txt .ft{font-size:13.5px;color:var(--texto)}
+.feed-txt .fm{font-size:11.5px;color:var(--texto-suave);margin-top:1px}
+.alert-item{display:flex;gap:11px;align-items:center;padding:11px 13px;border-radius:9px;
+  background:rgba(216,70,60,.08);border:1px solid rgba(216,70,60,.25);margin-bottom:8px}
+.alert-item.warn{background:rgba(224,139,42,.08);border-color:rgba(224,139,42,.25)}
+.alert-item .ai{font-size:18px}
+.alert-item .at{font-size:13px;color:var(--texto);flex:1}
+.alert-ok{text-align:center;color:var(--verde-claro);padding:20px;font-size:13.5px}
+
+/* Dashboard 2 colunas */
+.dash-2col{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;margin-top:18px}
+
+/* Detalhe cidade */
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.detail-box{background:var(--grafite2);border:1px solid var(--borda);border-radius:10px;padding:13px 15px}
+.detail-box h4{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--ouro);
+  margin-bottom:9px;display:flex;align-items:center;gap:7px}
+.detail-list{font-size:13px;color:var(--texto)}
+.detail-list .dl-item{padding:6px 0;border-bottom:1px solid #22272f;display:flex;justify-content:space-between;gap:8px}
+.detail-list .dl-item:last-child{border-bottom:none}
+.detail-list .empty{color:var(--texto-suave);font-style:italic;padding:6px 0}
+
+/* Grupos cards */
+.grupos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.grupo-card{background:linear-gradient(145deg,var(--grafite2),var(--grafite));
+  border:1px solid var(--borda);border-radius:12px;padding:16px;position:relative}
+.grupo-card .gc-top{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.grupo-card .gc-ico{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;
+  justify-content:center;font-size:22px;background:rgba(232,181,48,.14);border:1px solid rgba(232,181,48,.3)}
+.grupo-card h4{font-size:14.5px;color:var(--branco);font-weight:800}
+.grupo-card .gc-count{font-size:11.5px;color:var(--ouro-claro)}
+.grupo-card .gc-desc{font-size:12.5px;color:var(--texto-suave);min-height:34px}
+.grupo-card .gc-foot{display:flex;gap:6px;margin-top:11px;padding-top:11px;border-top:1px solid var(--borda)}
+
+/* Toast */
+.toast-wrap{position:fixed;bottom:22px;right:22px;z-index:200;display:flex;flex-direction:column;gap:9px}
+.toast{background:var(--grafite);border:1px solid var(--borda);border-left:4px solid var(--verde);
+  padding:12px 16px;border-radius:9px;box-shadow:var(--sombra);font-size:13.5px;
+  min-width:220px;animation:slidein .25s ease;display:flex;align-items:center;gap:9px}
+.toast.err{border-left-color:var(--vermelho)}
+.toast.info{border-left-color:var(--ouro)}
+@keyframes slidein{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+
+/* Config */
+.cfg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.cfg-box{background:var(--grafite2);border:1px solid var(--borda);border-radius:12px;padding:18px}
+.cfg-box h4{font-size:14px;color:var(--branco);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.cfg-box p{font-size:12.5px;color:var(--texto-suave);margin-bottom:13px}
+.cfg-box .btns{display:flex;flex-direction:column;gap:8px}
+.demo-banner{background:rgba(232,181,48,.1);border:1px solid rgba(232,181,48,.3);
+  border-radius:10px;padding:11px 15px;margin-bottom:16px;font-size:12.5px;color:var(--ouro-claro);
+  display:flex;align-items:center;gap:9px}
+
+.mini-list{list-style:none;font-size:12.5px}
+.mini-list li{padding:6px 0;border-bottom:1px solid #22272f;display:flex;justify-content:space-between;gap:10px}
+.mini-list li:last-child{border-bottom:none}
+
+/* ===================== ETAPA 3 ===================== */
+/* Fotos */
+.foto-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.foto-item{position:relative;width:96px;height:96px;border-radius:9px;overflow:hidden;border:1px solid var(--borda)}
+.foto-item img{width:100%;height:100%;object-fit:cover}
+.foto-item .rm{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:14px;cursor:pointer;line-height:1}
+.foto-add{width:96px;height:96px;border:2px dashed var(--borda);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--texto-suave);font-size:12px;cursor:pointer;gap:2px}
+.foto-add:hover{border-color:var(--ouro);color:var(--ouro-claro)}
+/* Checklist */
+.chk-etapa{background:var(--grafite2);border:1px solid var(--borda);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.chk-etapa h4{padding:11px 15px;background:var(--grafite3);font-size:13.5px;color:var(--ouro-claro);display:flex;justify-content:space-between;align-items:center}
+.chk-list{padding:6px 15px}
+.chk-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #22272f;font-size:13.5px;cursor:pointer}
+.chk-row:last-child{border-bottom:none}
+.chk-row input{width:18px;height:18px;flex:none;accent-color:var(--verde);cursor:pointer}
+.chk-row.done{color:var(--verde-claro)}
+.progress{height:9px;background:var(--grafite3);border-radius:20px;overflow:hidden;border:1px solid var(--borda)}
+.progress .bar{height:100%;background:linear-gradient(90deg,var(--verde),var(--verde-claro));transition:width .3s}
+/* Procedimentos */
+.proc-card{background:var(--grafite2);border:1px solid var(--borda);border-radius:11px;margin-bottom:12px;overflow:hidden}
+.proc-head{padding:13px 16px;display:flex;align-items:center;gap:11px;cursor:pointer;user-select:none}
+.proc-head .pi{font-size:22px}
+.proc-head h4{flex:1;font-size:14.5px;color:var(--branco)}
+.proc-head .ar{color:var(--texto-suave);transition:.2s}
+.proc-card.open .proc-head .ar{transform:rotate(90deg)}
+.proc-body{display:none;padding:0 16px 15px;font-size:13px}
+.proc-card.open .proc-body{display:block}
+.proc-body h5{font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--ouro);margin:12px 0 7px}
+.proc-body ul{list-style:none;display:flex;flex-wrap:wrap;gap:6px}
+.proc-body.ver ul li{background:var(--grafite3);border:1px solid var(--borda);border-radius:7px;padding:5px 10px;font-size:12.5px}
+.warn-box{background:rgba(216,70,60,.1);border:1px solid rgba(216,70,60,.35);border-radius:10px;padding:13px 16px;margin-bottom:16px;font-size:13px;color:#f0a59f;display:flex;gap:11px;align-items:flex-start}
+.warn-box .wi{font-size:22px;flex:none}
+/* Mapa */
+.mapa-wrap{background:var(--grafite2);border:1px solid var(--borda);border-radius:12px;padding:10px;overflow:auto}
+.mapa-svg{width:100%;height:auto;display:block;border-radius:8px;background:radial-gradient(circle at 50% 40%,#161b22,#0d0f12)}
+.mapa-svg .cid{fill:var(--azul);stroke:#fff;stroke-width:1.5;cursor:pointer}
+.mapa-svg .cid.ativa{fill:var(--vermelho)}
+.mapa-svg .lbl{fill:var(--texto-suave);font-size:9px;font-family:inherit}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--texto-suave)}
+.legend .dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:middle}
+/* Área de impressão (relatórios) */
+#printArea{display:none}
+.rep-head{display:flex;align-items:center;gap:14px;border-bottom:3px solid #b8860b;padding-bottom:10px}
+.rep-emblema{width:54px;height:54px;border-radius:50%;background:#15181d;border:3px solid #e8b530;display:flex;align-items:center;justify-content:center;font-size:26px;flex:none}
+.rep-h-txt{flex:1}
+.rep-rede{font-size:13px;font-weight:800;color:#8a6d12}
+.rep-emit{font-size:12px;color:#333}
+.rep-doc{font-size:15px;font-weight:800;color:#111;text-align:right;max-width:210px}
+.rep-sub{font-size:12px;color:#444;margin:6px 0 14px}
+.rep-sec{margin-bottom:14px}
+.rep-sec h3{font-size:13px;background:#f1e6c6;border-left:4px solid #e8b530;padding:6px 10px;color:#5a4708;margin-bottom:8px}
+.rep-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.rep-tbl td{border:1px solid #ccc;padding:6px 9px;vertical-align:top}
+.rep-tbl td.k{background:#f7f7f7;font-weight:600;width:34%;color:#333}
+.rep-fotos{display:flex;flex-wrap:wrap;gap:8px}
+.rep-fotos img{width:31%;border:1px solid #bbb;border-radius:4px}
+.rep-footer{margin-top:20px;border-top:1px solid #bbb;padding-top:8px;font-size:10.5px;color:#666;text-align:center}
+@media print{
+  body.printing .app, body.printing .modal-bg, body.printing .toast-wrap{display:none!important}
+  body.printing #printArea{display:block!important;color:#111;font-family:'Segoe UI',Arial,sans-serif}
+  @page{margin:14mm 12mm}
+}
+
+/* Status da nuvem */
+.nuvem{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:20px;border:1px solid var(--borda);background:var(--grafite3);color:var(--texto-suave);white-space:nowrap;cursor:pointer}
+.nuvem.ok{color:var(--verde-claro);border-color:rgba(31,157,77,.4);background:rgba(31,157,77,.12)}
+.nuvem.erro{color:#efa958;border-color:rgba(224,139,42,.4);background:rgba(224,139,42,.12)}
+
+/* Responsivo */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .btn-menu{display:flex;align-items:center;justify-content:center}
+  .dash-2col{grid-template-columns:1fr}
+  .search-top input{width:150px}
+  .form-grid{grid-template-columns:1fr}
+  .user-chip .un,.user-chip .ur{display:none}
+}
+@media(max-width:560px){
+  .content{padding:14px}
+  .topbar{padding:10px 14px}
+  .search-top{display:none}
+  .k-val{font-size:26px!important}
+}
+.overlay-mob{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:45}
+.overlay-mob.show{display:block}
+@media(min-width:901px){.overlay-mob{display:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="emblema"><span class="ico">🚚</span></div>
+      <div class="brand-txt">
+        <div class="t1">REDE NACIONAL</div>
+        <div class="t2">Vistoriadores e Reguladoras do Brasil</div>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-sec">Operação</div>
+      <a data-page="dashboard" class="active"><span class="ni">📊</span> Painel / Dashboard</a>
+      <a data-page="demandas"><span class="ni">📋</span> Central de Demandas <span class="badge" id="nav-dem" style="display:none">0</span></a>
+      <a data-page="mapa"><span class="ni">🗺️</span> Mapa Operacional</a>
+      <div class="nav-sec">Vistorias</div>
+      <a data-page="vistorias"><span class="ni">🚚</span> Vistorias e Cargas</a>
+      <a data-page="checklist"><span class="ni">✅</span> Checklist Tombamento</a>
+      <a data-page="procedimentos"><span class="ni">🧪</span> Procedimentos Ambientais</a>
+      <div class="nav-sec">Documentos</div>
+      <a data-page="relatorios"><span class="ni">📄</span> Relatórios</a>
+      <div class="nav-sec">Cadastros</div>
+      <a data-page="contatos"><span class="ni">👷</span> Contatos / Profissionais</a>
+      <a data-page="cidades"><span class="ni">🏙️</span> Cidades e Regiões</a>
+      <a data-page="grupos"><span class="ni">🧩</span> Grupos Operacionais</a>
+      <a data-page="empresas"><span class="ni">🏢</span> Empresas e Parceiros</a>
+      <div class="nav-sec">Sistema</div>
+      <a data-page="config"><span class="ni">⚙️</span> Configurações / Backup</a>
+    </nav>
+  </aside>
+  <div class="overlay-mob" id="overlayMob"></div>
+
+  <!-- ===================== MAIN ===================== -->
+  <div class="main">
+    <div class="topbar">
+      <button class="btn-menu" id="btnMenu">☰</button>
+      <div>
+        <div class="page-title" id="pageTitle">Painel / Dashboard</div>
+        <div class="page-sub" id="pageSub">Visão geral da central operacional</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="nuvem" id="nuvemStatus" style="display:none" onclick="clicarStatusNuvem()" title="Clique para atualizar"></div>
+      <div class="search-top">
+        <span class="si">🔎</span>
+        <input type="text" id="globalSearch" placeholder="Buscar contato, cidade...">
+      </div>
+      <div class="user-chip">
+        <div class="av">V</div>
+        <div><div class="un">Vistoriador</div><div class="ur">Central Operacional</div></div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ========== DASHBOARD ========== -->
+      <section class="page active" id="page-dashboard">
+        <div class="cards-grid" id="kpiGrid"></div>
+        <div class="dash-2col">
+          <div class="panel">
+            <div class="panel-head"><h3>🕒 Atividades Recentes</h3></div>
+            <div class="panel-body"><div class="feed" id="feedRecent"></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>⚠️ Alertas Operacionais</h3></div>
+            <div class="panel-body" id="alertBox"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== CONTATOS ========== -->
+      <section class="page" id="page-contatos">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>👷 Cadastro Mestre de Contatos</h3>
+            <div class="spacer"></div>
+            <button class="btn btn-ouro" onclick="openContato()">＋ Novo Contato</button>
+          </div>
+          <div class="panel-body">
+            <div class="filters" style="margin-bottom:14px">
+              <input type="text" id="fContatoBusca" placeholder="🔎 Nome, telefone, empresa..." oninput="renderContatos()">
+              <select id="fContatoCidade" onchange="renderContatos()"><option value="">Todas as cidades</option></select>
+              <select id="fContatoGrupo" onchange="renderContatos()"><option value="">Todos os grupos</option></select>
+              <select id="fContatoFuncao" onchange="renderContatos()"><option value="">Todas as funções</option></select>
+              <select id="fContatoSit" onchange="renderContatos()">
+                <option value="">Ativos e inativos</option>
+                <option value="ativo">Somente ativos</option>
+                <option value="inativo">Somente inativos</option>
+              </select>
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr>
+                  <th>Nome</th><th>Função</th><th>Grupos</th><th>Cidade/UF</th>
+                  <th>Telefone</th><th>Empresa</th><th>Situação</th><th style="text-align:right">Ações</th>
+                </tr></thead>
+                <tbody id="tbContatos"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== CIDADES ========== -->
+      <section class="page" id="page-cidades">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>🏙️ Cidades e Regiões Atendidas</h3>
+            <div class="spacer"></div>
+            <button class="btn btn-ouro" onclick="openCidade()">＋ Novo Município</button>
+          </div>
+          <div class="panel-body">
+            <div class="filters" style="margin-bottom:14px">
+              <input type="text" id="fCidadeBusca" placeholder="🔎 Cidade ou região..." oninput="renderCidades()">
+              <select id="fCidadeUF" onchange="renderCidades()"><option value="">Todos os estados</option></select>
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr>
+                  <th>Município</th><th>UF</th><th>Contatos</th><th>Prepostos</th>
+                  <th>Empresas</th><th>Observações</th><th style="text-align:right">Ações</th>
+                </tr></thead>
+                <tbody id="tbCidades"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== GRUPOS ========== -->
+      <section class="page" id="page-grupos">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>🧩 Grupos Operacionais</h3>
+            <div class="spacer"></div>
+            <button class="btn btn-ouro" onclick="openGrupo()">＋ Novo Grupo</button>
+          </div>
+          <div class="panel-body"><div class="grupos-grid" id="gruposGrid"></div></div>
+        </div>
+      </section>
+
+      <!-- ========== EMPRESAS ========== -->
+      <section class="page" id="page-empresas">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>🏢 Empresas e Parceiros</h3>
+            <div class="spacer"></div>
+            <button class="btn btn-ouro" onclick="openEmpresa()">＋ Nova Empresa</button>
+          </div>
+          <div class="panel-body">
+            <div class="filters" style="margin-bottom:14px">
+              <input type="text" id="fEmpresaBusca" placeholder="🔎 Empresa, responsável..." oninput="renderEmpresas()">
+              <select id="fEmpresaUF" onchange="renderEmpresas()"><option value="">Todos os estados</option></select>
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr>
+                  <th>Empresa</th><th>Responsável</th><th>Telefone</th>
+                  <th>Cidade/UF</th><th>Serviços</th><th style="text-align:right">Ações</th>
+                </tr></thead>
+                <tbody id="tbEmpresas"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== DEMANDAS ========== -->
+      <section class="page" id="page-demandas">
+        <div class="cards-grid" id="demKpi" style="grid-template-columns:repeat(auto-fill,minmax(155px,1fr))"></div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3>📋 Central de Demandas e Ocorrências</h3>
+            <div class="spacer"></div>
+            <button class="btn btn-ouro" onclick="openDemanda()">＋ Nova Demanda</button>
+          </div>
+          <div class="panel-body">
+            <div class="filters" style="margin-bottom:14px">
+              <input type="text" id="fDemBusca" placeholder="🔎 Código, empresa, descrição, local..." oninput="renderDemandas()">
+              <select id="fDemStatus" onchange="renderDemandas()"><option value="">Todos os status</option></select>
+              <select id="fDemCidade" onchange="renderDemandas()"><option value="">Todas as cidades</option></select>
+              <select id="fDemUrg" onchange="renderDemandas()"><option value="">Todas as urgências</option></select>
+            </div>
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr>
+                  <th>Código</th><th>Recebida</th><th>Tipo de serviço</th><th>Local</th>
+                  <th>Urgência</th><th>Profissional</th><th>Status</th><th style="text-align:right">Ações</th>
+                </tr></thead>
+                <tbody id="tbDemandas"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== VISTORIAS ========== -->
+      <section class="page" id="page-vistorias">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>🚚 Vistorias de Caminhões e Cargas</h3>
+            <div class="spacer"></div>
+            <button class="btn btn-ouro" onclick="openVistoria()">＋ Nova Vistoria</button>
+          </div>
+          <div class="panel-body">
+            <div class="filters" style="margin-bottom:14px">
+              <input type="text" id="fVistBusca" placeholder="🔎 Placa, motorista, transportadora, carga..." oninput="renderVistorias()">
+              <select id="fVistCidade" onchange="renderVistorias()"><option value="">Todas as cidades</option></select>
+            </div>
+            <div class="tbl-wrap"><table>
+              <thead><tr><th>Código</th><th>Data</th><th>Placa</th><th>Transportadora</th><th>Carga</th><th>Local</th><th>Tipo</th><th>Checklist</th><th style="text-align:right">Ações</th></tr></thead>
+              <tbody id="tbVistorias"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== CHECKLIST ========== -->
+      <section class="page" id="page-checklist">
+        <div class="panel">
+          <div class="panel-head"><h3>✅ Checklist de Atendimento de Tombamento</h3></div>
+          <div class="panel-body">
+            <div class="demo-banner">ⓘ O checklist pertence a uma vistoria. Escolha uma vistoria abaixo para preencher as 5 etapas, ou crie uma nova em “Vistorias e Cargas”.</div>
+            <div id="chkLista"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== PROCEDIMENTOS ========== -->
+      <section class="page" id="page-procedimentos">
+        <div class="panel">
+          <div class="panel-head"><h3>🧪 Procedimentos de Tombamento e Emergências Ambientais</h3></div>
+          <div class="panel-body" id="procBody"></div>
+        </div>
+      </section>
+
+      <!-- ========== RELATÓRIOS ========== -->
+      <section class="page" id="page-relatorios">
+        <div class="panel">
+          <div class="panel-head"><h3>📄 Relatórios e Documentos</h3></div>
+          <div class="panel-body" id="relBody"></div>
+        </div>
+      </section>
+
+      <!-- ========== MAPA ========== -->
+      <section class="page" id="page-mapa">
+        <div class="panel">
+          <div class="panel-head"><h3>🗺️ Mapa Operacional</h3></div>
+          <div class="panel-body" id="mapaBody"></div>
+        </div>
+      </section>
+
+      <!-- ========== CONFIG ========== -->
+      <section class="page" id="page-config">
+        <div class="demo-banner">
+          ⓘ Os dados são salvos automaticamente <strong>neste navegador</strong>. Para não perder nada ao trocar de computador ou limpar o navegador, use o <strong>Backup / Exportar</strong> abaixo regularmente.
+        </div>
+        <div class="cfg-grid">
+          <div class="cfg-box">
+            <h4>🪪 Dados do Emitente (vistoriador)</h4>
+            <p>Aparecem no cabeçalho e no rodapé dos relatórios em PDF.</p>
+            <div class="fld" style="margin-bottom:8px"><label>Nome</label><input id="em_nome"></div>
+            <div class="fld" style="margin-bottom:8px"><label>Função / Registro</label><input id="em_registro" placeholder="Vistoriador / Regulador"></div>
+            <div class="fld" style="margin-bottom:8px"><label>Telefone</label><input id="em_tel"></div>
+            <div class="fld" style="margin-bottom:8px"><label>E-mail</label><input id="em_email"></div>
+            <div class="fld" style="margin-bottom:10px"><label>Cidade/UF base</label><input id="em_cidade"></div>
+            <button class="btn btn-ouro btn-sm" onclick="saveEmitente()">💾 Salvar dados</button>
+          </div>
+          <div class="cfg-box">
+            <h4>💾 Backup e Restauração</h4>
+            <p>Salve todos os seus cadastros em um arquivo, ou restaure a partir de um backup anterior.</p>
+            <div class="btns">
+              <button class="btn btn-ouro" onclick="exportBackup()">⬇️ Baixar Backup (tudo)</button>
+              <button class="btn" onclick="document.getElementById('impBackup').click()">⬆️ Restaurar Backup</button>
+              <input type="file" id="impBackup" accept=".json" style="display:none" onchange="importBackup(event)">
+            </div>
+          </div>
+          <div class="cfg-box">
+            <h4>📊 Exportar Dados</h4>
+            <p>Exporte listas em planilha (CSV) para abrir no Excel.</p>
+            <div class="btns">
+              <button class="btn" onclick="exportCSV('contatos')">📄 Contatos (CSV)</button>
+              <button class="btn" onclick="exportCSV('cidades')">📄 Cidades (CSV)</button>
+              <button class="btn" onclick="exportCSV('empresas')">📄 Empresas (CSV)</button>
+            </div>
+          </div>
+          <div class="cfg-box">
+            <h4>📥 Importar Contatos (planilha)</h4>
+            <p>Importe uma lista de contatos de um arquivo CSV. <a href="#" onclick="modeloCSV();return false">Baixar modelo</a></p>
+            <div class="btns">
+              <button class="btn btn-verde" onclick="document.getElementById('impCSV').click()">⬆️ Importar CSV</button>
+              <input type="file" id="impCSV" accept=".csv" style="display:none" onchange="importCSV(event)">
+            </div>
+          </div>
+          <div class="cfg-box">
+            <h4>🧰 Tipos de Serviço</h4>
+            <p>Lista de tipos de serviço usada nos cadastros e demandas.</p>
+            <ul class="mini-list" id="tiposServList"></ul>
+            <div class="btns" style="margin-top:10px">
+              <button class="btn btn-sm" onclick="addTipoServico()">＋ Adicionar tipo</button>
+            </div>
+          </div>
+          <div class="cfg-box">
+            <h4>🗃️ Dados Demonstrativos</h4>
+            <p>O sistema já vem com alguns contatos de <strong>exemplo</strong> (claramente marcados como DEMO) para você ver funcionando. Você pode removê-los quando quiser.</p>
+            <div class="btns">
+              <button class="btn btn-verde" onclick="carregarDemo()">↺ Recarregar exemplos</button>
+              <button class="btn btn-vermelho" onclick="limparDemo()">🧹 Remover só os exemplos</button>
+            </div>
+          </div>
+          <div class="cfg-box" style="border-color:#6e2b27">
+            <h4>⚠️ Zona de Risco</h4>
+            <p>Apaga <strong>todos</strong> os dados e volta o sistema ao estado inicial. Faça um backup antes!</p>
+            <div class="btns">
+              <button class="btn btn-vermelho" onclick="resetTudo()">🗑️ Apagar tudo e reiniciar</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAIS ===================== -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modalBox">
+    <div class="modal-head">
+      <h3 id="modalTitle">Cadastro</h3>
+      <button class="x" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+<div id="printArea"></div>
+
+<script>
+/* Mostra qualquer erro de inicialização na própria tela (para diagnóstico). */
+window.onerror=function(msg,src,line){
+  try{
+    var b=document.getElementById('bootErr');
+    if(!b){b=document.createElement('div');b.id='bootErr';
+      b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#d8463c;color:#fff;padding:12px 14px;font:13px/1.4 sans-serif;white-space:pre-wrap';
+      document.body.appendChild(b);}
+    b.textContent='⚠️ Erro ao iniciar o sistema:\n'+msg+(line?(' (linha '+line+')'):'')+'\n\nTire um print desta tela e me envie.';
+  }catch(_){}
+  return false;
+};
+/* =======================================================================
+   CENTRAL OPERACIONAL — Rede Nacional de Vistoriadores e Reguladoras
+   Etapa 1: Dashboard, Cidades, Contatos, Grupos, Empresas, Config/Backup
+   Persistência: localStorage  |  Backup/Exportação/Importação incluídos
+   ======================================================================= */
+
+const DB_KEY = 'rede_vistoriadores_v1';
+/* ---- Nuvem compartilhada (Supabase) ---- */
+const SB_URL='https://mjlnanhrgteugkpqttnn.supabase.co';
+const SB_KEY='sb_publishable_atgproWLAKqudbP3qCqaYw_NLHx9MKe';
+const SB_ON=!!(SB_URL&&SB_KEY);
+const SB_ROW='principal';
+let paginaAtual='dashboard';
+let nuvemOK=false, salvarTimer=null, ultimaNuvem=0, nuvemErro='';
+const UF_LIST = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+
+/* ---------- Estado ---------- */
+let DB = {
+  cidades:[], contatos:[], grupos:[], empresas:[], demandas:[], vistorias:[], emitente:{},
+  tiposServico:[], atividades:[],
+  seq:{contato:1, cidade:1, empresa:1, grupo:1, atividade:1, demanda:1, vistoria:1}
+};
+
+/* ---------- Dados iniciais ---------- */
+/* Coordenadas aproximadas da sede de cada município (dados geográficos públicos).
+   Usadas só para ordenar por proximidade em LINHA RETA — nunca por estrada/tempo. */
+const CIDADES_INICIAIS = [
+  ['Ribeirão Cascalheira','MT',-12.56,-51.82],['Tangará da Serra','MT',-14.62,-57.49],['Querência','MT',-12.61,-52.21],
+  ['Campo Novo do Parecis','MT',-13.67,-57.89],['Paranatinga','MT',-14.43,-54.05],['Barra do Garças','MT',-15.89,-52.26],
+  ['Nova Xavantina','MT',-14.67,-52.35],['Paraíso das Águas','MS',-19.02,-53.01],['Jataí','GO',-17.88,-51.72],
+  ['Mineiros','GO',-17.57,-52.55],['Cáceres','MT',-16.07,-57.68],['Cuiabá','MT',-15.60,-56.10],['Várzea Grande','MT',-15.65,-56.13],
+  ['Terra Nova do Norte','MT',-10.52,-55.23],['Vilhena','RO',-12.74,-60.15]
+];
+const GRUPOS_INICIAIS = [
+  ['Grupo de Reguladores','⚖️','Profissionais responsáveis pela regulação, organização e direcionamento de demandas.'],
+  ['Prepostos','🧑‍🔧','Profissionais responsáveis pela execução de serviços e vistorias nas localidades em que atuam.'],
+  ['Mapas','🗺️','Contatos e profissionais relacionados ao apoio de localização, georreferenciamento e informações logísticas.'],
+  ['Equipe de Chapa','💪','Equipe de apoio operacional conforme as atribuições e atividades contratadas.'],
+  ['Vigilantes','🛡️','Profissionais responsáveis por serviços de vigilância e segurança, conforme habilitação e atribuições.'],
+  ['Pronta Resposta','🚨','Profissionais e equipes especializados em atendimento emergencial e suporte operacional.']
+];
+const TIPOS_SERVICO_INICIAIS = [
+  'Vistoria ambiental','Vistoria veicular','Tombamento de caminhão','Colisão / acidente rodoviário',
+  'Vistoria de carga','Avaliação de danos','Acompanhamento de remoção','Monitoramento de carga',
+  'Inspeção / levantamento','Serviço de campo','Vigilância / segurança','Pronta resposta'
+];
+const FUNCOES = ['Vistoriador','Regulador','Preposto','Perito','Apoio logístico (Mapas)','Equipe de Chapa','Vigilante','Pronta Resposta','Motorista','Guincho/Remoção','Outro'];
+
+/* ---------- Persistência ---------- */
+let storageOK=true;
+function save(){
+  try{ localStorage.setItem(DB_KEY, JSON.stringify(DB)); }
+  catch(e){ if(storageOK && !SB_ON){ storageOK=false; toast('Este navegador não permite salvar. Use o Backup para não perder os dados.','err'); } }
+  agendarNuvemSalvar();
+  return true;
+}
+function load(){
+  let raw=null;
+  try{ raw=localStorage.getItem(DB_KEY); }catch(e){ storageOK=false; return false; }
+  if(raw){ try{ DB = JSON.parse(raw); return true; }catch(e){} }
+  return false;
+}
+/* ---- Sincronização com a nuvem (Supabase REST) ---- */
+function sbHeaders(extra){ return Object.assign({'apikey':SB_KEY,'Content-Type':'application/json'}, extra||{}); }
+function modalAberto(){ const m=document.getElementById('modalBg'); return m && m.classList.contains('open'); }
+function agendarNuvemSalvar(){ if(!SB_ON) return; clearTimeout(salvarTimer); salvarTimer=setTimeout(()=>{ nuvemSalvar().then(atualizarStatusNuvem); }, 900); }
+async function sbFetch(url,opts){
+  const r=await fetch(url,opts);
+  if(!r.ok){ let t=''; try{ t=await r.text(); }catch(_){} throw new Error('HTTP '+r.status+(t?(' — '+t.slice(0,180)):'')); }
+  return r;
+}
+async function nuvemCarregar(){
+  if(!SB_ON) return false;
+  try{
+    const r=await sbFetch(SB_URL+'/rest/v1/app_dados?id=eq.'+SB_ROW+'&select=conteudo,atualizado_em',{headers:sbHeaders()});
+    const arr=await r.json(); nuvemOK=true; nuvemErro='';
+    if(arr&&arr.length&&arr[0].conteudo){ DB=arr[0].conteudo; ultimaNuvem=Date.parse(arr[0].atualizado_em)||Date.now(); return true; }
+    return false;
+  }catch(e){ nuvemOK=false; nuvemErro=String(e.message||e); return false; }
+}
+async function nuvemSalvar(){
+  if(!SB_ON) return false;
+  try{
+    const body=[{id:SB_ROW,conteudo:DB,atualizado_em:new Date().toISOString()}];
+    await sbFetch(SB_URL+'/rest/v1/app_dados',{method:'POST',headers:sbHeaders({'Prefer':'resolution=merge-duplicates,return=minimal'}),body:JSON.stringify(body)});
+    nuvemOK=true; nuvemErro=''; ultimaNuvem=Date.now(); return true;
+  }catch(e){ nuvemOK=false; nuvemErro=String(e.message||e); return false; }
+}
+async function nuvemPoll(){
+  if(!SB_ON||modalAberto()) return;
+  try{
+    const r=await sbFetch(SB_URL+'/rest/v1/app_dados?id=eq.'+SB_ROW+'&select=atualizado_em',{headers:sbHeaders()});
+    const arr=await r.json(); nuvemOK=true; nuvemErro='';
+    if(arr&&arr.length){ const t=Date.parse(arr[0].atualizado_em)||0;
+      if(t>ultimaNuvem+800){ if(await nuvemCarregar()){ normalizeEstrutura(); try{ localStorage.setItem(DB_KEY,JSON.stringify(DB)); }catch(e){} try{ goTo(paginaAtual); }catch(e){} toast('Dados atualizados da nuvem.','info'); } }
+    }
+    atualizarStatusNuvem();
+  }catch(e){ nuvemOK=false; nuvemErro=String(e.message||e); atualizarStatusNuvem(); }
+}
+function clicarStatusNuvem(){
+  if(!nuvemOK && nuvemErro){ toast('Detalhe do erro: '+nuvemErro,'err'); }
+  nuvemPoll();
+}
+function atualizarStatusNuvem(){
+  const el=document.getElementById('nuvemStatus'); if(!el) return;
+  if(!SB_ON){ el.style.display='none'; return; }
+  el.style.display='inline-flex';
+  if(nuvemOK){ el.textContent='☁️ Sincronizado'; el.className='nuvem ok'; el.title='Conectado à nuvem'; }
+  else { el.textContent='⚠️ Sem conexão (toque p/ ver o motivo)'; el.className='nuvem erro'; el.title=nuvemErro||'Sem conexão'; }
+}
+function nextId(tipo){ const n = DB.seq[tipo]||1; DB.seq[tipo]=n+1; return n; }
+
+/* ---------- Seed inicial ---------- */
+function seedInicial(incluirDemo){
+  DB = { cidades:[], contatos:[], grupos:[], empresas:[], demandas:[], vistorias:[], emitente:{}, tiposServico:[], atividades:[],
+         seq:{contato:1,cidade:1,empresa:1,grupo:1,atividade:1,demanda:1,vistoria:1} };
+  CIDADES_INICIAIS.forEach(([nome,uf,lat,lng])=> DB.cidades.push({id:nextId('cidade'),nome,uf,lat,lng,obs:''}));
+  GRUPOS_INICIAIS.forEach(([nome,icone,desc])=> DB.grupos.push({id:nextId('grupo'),nome,icone,desc,responsavel:''}));
+  DB.tiposServico = [...TIPOS_SERVICO_INICIAIS];
+  if(incluirDemo) seedDemo();
+  save();
+}
+function seedDemo(){
+  const demo = [
+    {nome:'João Ribeiro da Silva [DEMO]',tel1:'(66) 99988-1122',wpp:'66999881122',cidade:'Barra do Garças',uf:'MT',empresa:'Autônomo',funcao:'Vistoriador',grupos:['Prepostos','Grupo de Reguladores'],especialidades:'Vistoria veicular, tombamento',servicos:'Vistoria veicular; Tombamento de caminhão',disp:'A confirmar',obs:'Contato de exemplo.',situacao:'ativo'},
+    {nome:'Maria Souza Andrade [DEMO]',tel1:'(65) 98877-3344',wpp:'65988773344',cidade:'Cuiabá',uf:'MT',empresa:'Autônomo',funcao:'Preposto',grupos:['Prepostos'],especialidades:'Vistoria de carga',servicos:'Vistoria de carga; Avaliação de danos',disp:'A confirmar',obs:'Contato de exemplo.',situacao:'ativo'},
+    {nome:'Carlos Eduardo Pereira [DEMO]',tel1:'(67) 99665-7788',wpp:'67996657788',cidade:'Paraíso das Águas',uf:'MS',empresa:'Autônomo',funcao:'Pronta Resposta',grupos:['Pronta Resposta','Prepostos'],especialidades:'Atendimento emergencial rodoviário',servicos:'Pronta resposta; Serviço de campo',disp:'A confirmar',obs:'Contato de exemplo.',situacao:'ativo'},
+    {nome:'Antônio Ferreira Lima [DEMO]',tel1:'(64) 99112-5566',wpp:'64991125566',cidade:'Jataí',uf:'GO',empresa:'Autônomo',funcao:'Vigilante',grupos:['Vigilantes'],especialidades:'Vigilância patrimonial',servicos:'Vigilância / segurança',disp:'A confirmar',obs:'Contato de exemplo.',situacao:'ativo'}
+  ];
+  demo.forEach(d=> DB.contatos.push(Object.assign({id:nextId('contato'),demo:true,tel2:'',endereco:''}, d)));
+  logAtiv('👷','4 contatos de exemplo (DEMO) adicionados');
+  save();
+}
+
+/* ---------- Atividades ---------- */
+function logAtiv(icone,texto){
+  DB.atividades.unshift({id:nextId('atividade'),icone,texto,data:new Date().toISOString()});
+  DB.atividades = DB.atividades.slice(0,40);
+}
+function tempoRel(iso){
+  const d=new Date(iso), ag=new Date(), s=(ag-d)/1000;
+  if(s<60)return'agora há pouco';
+  if(s<3600)return`há ${Math.floor(s/60)} min`;
+  if(s<86400)return`há ${Math.floor(s/3600)} h`;
+  if(s<172800)return'ontem';
+  return d.toLocaleDateString('pt-BR');
+}
+
+/* ---------- Toast ---------- */
+function toast(msg,tipo='ok'){
+  const w=document.getElementById('toastWrap');
+  const t=document.createElement('div');
+  t.className='toast '+(tipo==='ok'?'':tipo);
+  const ic = tipo==='err'?'❌':tipo==='info'?'ℹ️':'✅';
+  t.innerHTML=`<span>${ic}</span><span>${msg}</span>`;
+  w.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(40px)';setTimeout(()=>t.remove(),250);},2800);
+}
+
+/* ---------- Helpers ---------- */
+function esc(s){return(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function pad2(n){return String(n).padStart(2,'0');}
+function soDigitos(s){return(s||'').replace(/\D/g,'');}
+function wppLink(num){
+  let d=soDigitos(num); if(!d)return'';
+  if(d.length<=11 && d[0]!=='5') d='55'+d; // assume Brasil
+  return'https://wa.me/'+d;
+}
+function uniq(arr){return[...new Set(arr)];}
+
+/* =======================================================================
+   NAVEGAÇÃO
+   ======================================================================= */
+const PAGE_INFO={
+  dashboard:['Painel / Dashboard','Visão geral da central operacional'],
+  contatos:['Contatos / Profissionais','Base central de contatos e prepostos'],
+  cidades:['Cidades e Regiões','Municípios atendidos e consulta por região'],
+  grupos:['Grupos Operacionais','Organização dos profissionais por função'],
+  empresas:['Empresas e Parceiros','Contratantes, seguradoras e parceiros'],
+  demandas:['Central de Demandas','Registro e acompanhamento de ocorrências'],
+  vistorias:['Vistorias e Cargas','Atendimentos de caminhões e cargas'],
+  checklist:['Checklist de Tombamento','Checklist interativo das 5 etapas'],
+  procedimentos:['Procedimentos Ambientais','Guia de procedimentos por tipo de carga'],
+  relatorios:['Relatórios e Documentos','Gerar e imprimir documentos (PDF)'],
+  mapa:['Mapa Operacional','Municípios e atendimentos por coordenadas'],
+  config:['Configurações / Backup','Backup, exportação, importação e ajustes']
+};
+function goTo(page){
+  paginaAtual=page;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.page===page));
+  const [t,s]=PAGE_INFO[page]||['',''];
+  document.getElementById('pageTitle').textContent=t;
+  document.getElementById('pageSub').textContent=s;
+  if(page==='dashboard')renderDashboard();
+  if(page==='contatos')renderContatos();
+  if(page==='cidades')renderCidades();
+  if(page==='grupos')renderGrupos();
+  if(page==='empresas')renderEmpresas();
+  if(page==='demandas')renderDemandas();
+  if(page==='vistorias')renderVistorias();
+  if(page==='checklist')renderChecklistPage();
+  if(page==='procedimentos')renderProcedimentos();
+  if(page==='relatorios')renderRelatorios();
+  if(page==='mapa')renderMapa();
+  if(page==='config')renderConfig();
+  closeSidebarMob();
+}
+document.getElementById('nav').addEventListener('click',e=>{
+  const a=e.target.closest('a'); if(a)goTo(a.dataset.page);
+});
+
+/* Menu mobile */
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlayMob').classList.toggle('show');}
+function closeSidebarMob(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlayMob').classList.remove('show');}
+document.getElementById('btnMenu').onclick=toggleSidebar;
+document.getElementById('overlayMob').onclick=closeSidebarMob;
+
+/* =======================================================================
+   DASHBOARD
+   ======================================================================= */
+function renderDashboard(){
+  const dem=DB.demandas||[];
+  const prepostosConf = DB.contatos.filter(c=>c.situacao==='ativo' && (c.grupos||[]).includes('Prepostos')).length;
+  const kpis=[
+    ['📥','Demandas recebidas',dem.length,''],
+    ['⏳','Aguardando atendimento',dem.filter(d=>['Nova demanda','Aguardando análise','Aguardando profissional'].includes(d.status)).length,'c-laranja'],
+    ['🔄','Em andamento',dem.filter(d=>['Profissional acionado','Atendimento confirmado','Em deslocamento','Em execução','Aguardando documentação','Em análise'].includes(d.status)).length,'c-azul'],
+    ['📤','Encaminhadas a prepostos',dem.filter(d=>d.preposto).length,''],
+    ['✅','Concluídas',dem.filter(d=>d.status==='Concluída').length,'c-verde'],
+    ['🚫','Canceladas',dem.filter(d=>d.status==='Cancelada').length,'c-vermelho'],
+    ['👷','Contatos cadastrados',DB.contatos.length,''],
+    ['🏙️','Municípios atendidos',DB.cidades.length,''],
+    ['🧑‍🔧','Prepostos (ativos)',prepostosConf,'c-verde'],
+    ['🚨','Atendimentos emergenciais',dem.filter(d=>d.urgencia==='Emergencial').length,'c-vermelho']
+  ];
+  document.getElementById('kpiGrid').innerHTML = kpis.map(([ic,lbl,val,cls])=>`
+    <div class="card ${cls}">
+      <div class="k-top"><span class="k-lbl" style="max-width:120px">${lbl}</span><span class="k-ico">${ic}</span></div>
+      <div class="k-val">${val}</div>
+    </div>`).join('');
+
+  // Atividades
+  const feed=document.getElementById('feedRecent');
+  if(!DB.atividades.length){ feed.innerHTML='<div class="t-empty">Nenhuma movimentação ainda. Comece cadastrando um contato ou município.</div>'; }
+  else feed.innerHTML=DB.atividades.slice(0,8).map(a=>`
+    <div class="feed-item">
+      <div class="feed-dot">${a.icone}</div>
+      <div class="feed-txt"><div class="ft">${esc(a.texto)}</div><div class="fm">${tempoRel(a.data)}</div></div>
+    </div>`).join('');
+
+  // Alertas
+  const box=document.getElementById('alertBox');
+  const alerts=[];
+  const aberta=d=>!['Concluída','Cancelada'].includes(d.status);
+  const emerg=(DB.demandas||[]).filter(d=>aberta(d)&&d.urgencia==='Emergencial');
+  if(emerg.length) alerts.push(['','🚨',`${emerg.length} atendimento(s) emergencial(is) em aberto.`]);
+  const hoje0=new Date().toISOString().slice(0,10);
+  const vencidas=(DB.demandas||[]).filter(d=>aberta(d)&&d.prazo&&d.prazo<hoje0);
+  if(vencidas.length) alerts.push(['','⏰',`${vencidas.length} demanda(s) com prazo vencido.`]);
+  const semProf=(DB.demandas||[]).filter(d=>aberta(d)&&!d.profissional&&!d.preposto);
+  if(semProf.length) alerts.push(['warn','📤',`${semProf.length} demanda(s) aguardando designação de profissional.`]);
+  const cidadesSemContato = DB.cidades.filter(c=>!DB.contatos.some(ct=>ct.cidade===c.nome)).length;
+  if(cidadesSemContato>0) alerts.push(['warn','🏙️',`${cidadesSemContato} município(s) sem nenhum contato cadastrado.`]);
+  const inativos = DB.contatos.filter(c=>c.situacao==='inativo').length;
+  if(inativos>0) alerts.push(['warn','🚫',`${inativos} contato(s) marcados como inativos.`]);
+  const semGrupo = DB.contatos.filter(c=>!(c.grupos&&c.grupos.length)).length;
+  if(semGrupo>0) alerts.push(['warn','🧩',`${semGrupo} contato(s) sem grupo operacional definido.`]);
+  if(DB.contatos.length===0) alerts.push(['','👷','Nenhum contato cadastrado ainda. A distribuição de serviços depende da base de contatos.']);
+
+  if(!alerts.length) box.innerHTML='<div class="alert-ok">✅ Tudo em ordem. Nenhum alerta no momento.</div>';
+  else box.innerHTML=alerts.map(([cls,ic,txt])=>`<div class="alert-item ${cls}"><span class="ai">${ic}</span><span class="at">${txt}</span></div>`).join('');
+}
+
+/* =======================================================================
+   CONTATOS
+   ======================================================================= */
+function preencherSelectsContato(){
+  const cid=document.getElementById('fContatoCidade');
+  cid.innerHTML='<option value="">Todas as cidades</option>'+DB.cidades.map(c=>`<option>${esc(c.nome)}</option>`).join('');
+  const gr=document.getElementById('fContatoGrupo');
+  gr.innerHTML='<option value="">Todos os grupos</option>'+DB.grupos.map(g=>`<option>${esc(g.nome)}</option>`).join('');
+  const fn=document.getElementById('fContatoFuncao');
+  const funcoes=uniq(DB.contatos.map(c=>c.funcao).filter(Boolean));
+  fn.innerHTML='<option value="">Todas as funções</option>'+funcoes.map(f=>`<option>${esc(f)}</option>`).join('');
+}
+function renderContatos(){
+  preencherSelectsContato();
+  const q=(document.getElementById('fContatoBusca').value||'').toLowerCase();
+  const fc=document.getElementById('fContatoCidade').value;
+  const fg=document.getElementById('fContatoGrupo').value;
+  const ff=document.getElementById('fContatoFuncao').value;
+  const fs=document.getElementById('fContatoSit').value;
+  let lista=DB.contatos.filter(c=>{
+    if(fc&&c.cidade!==fc)return false;
+    if(fg&&!(c.grupos||[]).includes(fg))return false;
+    if(ff&&c.funcao!==ff)return false;
+    if(fs&&c.situacao!==fs)return false;
+    if(q){const blob=[c.nome,c.tel1,c.tel2,c.wpp,c.empresa,c.funcao,c.especialidades,c.cidade].join(' ').toLowerCase();if(!blob.includes(q))return false;}
+    return true;
+  });
+  const tb=document.getElementById('tbContatos');
+  if(!lista.length){tb.innerHTML=`<tr><td colspan="8" class="t-empty">Nenhum contato encontrado.</td></tr>`;return;}
+  tb.innerHTML=lista.map(c=>{
+    const grupos=(c.grupos||[]).map(g=>`<span class="tag tag-ouro">${esc(g)}</span>`).join(' ')||'<span class="tag tag-cinza">—</span>';
+    const wpp=wppLink(c.wpp||c.tel1);
+    const sit=c.situacao==='ativo'?'<span class="tag tag-verde">Ativo</span>':'<span class="tag tag-vermelho">Inativo</span>';
+    return`<tr>
+      <td><strong>${esc(c.nome)}</strong>${c.demo?' <span class="tag tag-cinza" style="font-size:9px">DEMO</span>':''}</td>
+      <td>${esc(c.funcao||'—')}</td>
+      <td><div class="chips">${grupos}</div></td>
+      <td>${esc(c.cidade||'—')}${c.uf?'/'+esc(c.uf):''}</td>
+      <td>${esc(c.tel1||'—')}</td>
+      <td>${esc(c.empresa||'—')}</td>
+      <td>${sit}</td>
+      <td><div class="row-actions">
+        ${wpp?`<a class="ic-btn wpp" href="${wpp}" target="_blank" title="WhatsApp">💬</a>`:''}
+        <button class="ic-btn view" onclick="verContato(${c.id})" title="Ver">👁️</button>
+        <button class="ic-btn edit" onclick="openContato(${c.id})" title="Editar">✏️</button>
+        <button class="ic-btn del" onclick="delContato(${c.id})" title="Excluir">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function openContato(id){
+  const c = id?DB.contatos.find(x=>x.id===id):{grupos:[],situacao:'ativo'};
+  const cidadesOpt=DB.cidades.map(ci=>`<option ${c.cidade===ci.nome?'selected':''} data-uf="${ci.uf}">${esc(ci.nome)}</option>`).join('');
+  const funcoesOpt=FUNCOES.map(f=>`<option ${c.funcao===f?'selected':''}>${esc(f)}</option>`).join('');
+  const gruposChk=DB.grupos.map(g=>{
+    const on=(c.grupos||[]).includes(g.nome);
+    return`<label class="chk ${on?'on':''}"><input type="checkbox" value="${esc(g.nome)}" ${on?'checked':''} onchange="this.closest('.chk').classList.toggle('on',this.checked)"> ${esc(g.nome)}</label>`;
+  }).join('');
+  setModal(id?'Editar Contato':'Novo Contato',`
+    <div class="form-grid">
+      <div class="fld full"><label>Nome completo <span class="req">*</span></label><input id="c_nome" value="${esc(c.nome||'')}"></div>
+      <div class="fld"><label>Telefone principal</label><input id="c_tel1" value="${esc(c.tel1||'')}" placeholder="(66) 99999-9999"></div>
+      <div class="fld"><label>Telefone secundário</label><input id="c_tel2" value="${esc(c.tel2||'')}"></div>
+      <div class="fld"><label>WhatsApp (só números)</label><input id="c_wpp" value="${esc(c.wpp||'')}" placeholder="66999999999"></div>
+      <div class="fld"><label>Função profissional</label><select id="c_funcao"><option value="">—</option>${funcoesOpt}</select></div>
+      <div class="fld"><label>Município</label><select id="c_cidade" onchange="autoUF(this,'c_uf')"><option value="">—</option>${cidadesOpt}</select></div>
+      <div class="fld"><label>Estado (UF)</label><input id="c_uf" value="${esc(c.uf||'')}" maxlength="2" style="text-transform:uppercase"></div>
+      <div class="fld full"><label>Grupos operacionais (pode marcar vários)</label><div class="checks">${gruposChk||'<span style="color:var(--texto-suave)">Cadastre grupos primeiro.</span>'}</div></div>
+      <div class="fld"><label>Empresa vinculada</label><input id="c_empresa" value="${esc(c.empresa||'')}"></div>
+      <div class="fld"><label>Disponibilidade</label><select id="c_disp">
+        ${['A confirmar','Disponível (confirmado)','Indisponível','Sob consulta'].map(d=>`<option ${c.disp===d?'selected':''}>${d}</option>`).join('')}
+      </select></div>
+      <div class="fld full"><label>Especialidades</label><input id="c_esp" value="${esc(c.especialidades||'')}" placeholder="Ex.: vistoria veicular, tombamento, carga..."></div>
+      <div class="fld full"><label>Serviços que pode executar</label><input id="c_serv" value="${esc(c.servicos||'')}" placeholder="Separe por ; (ponto e vírgula)"></div>
+      <div class="fld full"><label>Endereço / região de atendimento</label><input id="c_end" value="${esc(c.endereco||'')}"></div>
+      <div class="fld full"><label>Observações</label><textarea id="c_obs">${esc(c.obs||'')}</textarea></div>
+      <div class="fld"><label>Situação do cadastro</label><select id="c_sit">
+        <option value="ativo" ${c.situacao!=='inativo'?'selected':''}>Ativo</option>
+        <option value="inativo" ${c.situacao==='inativo'?'selected':''}>Inativo</option>
+      </select></div>
+    </div>`,
+    `<button class="btn" onclick="closeModal()">Cancelar</button>
+     <button class="btn btn-ouro" onclick="saveContato(${id||0})">💾 Salvar</button>`);
+}
+function autoUF(sel,targetId){
+  const opt=sel.options[sel.selectedIndex];
+  const uf=opt?opt.getAttribute('data-uf'):'';
+  if(uf)document.getElementById(targetId).value=uf;
+}
+function saveContato(id){
+  const nome=val('c_nome').trim();
+  if(!nome){toast('Informe o nome do contato.','err');return;}
+  const grupos=[...document.querySelectorAll('#modalBody .checks input:checked')].map(i=>i.value);
+  const obj={
+    nome, tel1:val('c_tel1'), tel2:val('c_tel2'), wpp:val('c_wpp'),
+    funcao:val('c_funcao'), cidade:val('c_cidade'), uf:val('c_uf').toUpperCase(),
+    grupos, empresa:val('c_empresa'), disp:val('c_disp'),
+    especialidades:val('c_esp'), servicos:val('c_serv'), endereco:val('c_end'),
+    obs:val('c_obs'), situacao:val('c_sit')
+  };
+  if(id){Object.assign(DB.contatos.find(x=>x.id===id),obj);logAtiv('✏️',`Contato atualizado: ${nome}`);}
+  else{obj.id=nextId('contato');DB.contatos.push(obj);logAtiv('👷',`Novo contato: ${nome} (${obj.cidade||'s/ cidade'})`);}
+  save();closeModal();renderContatos();toast('Contato salvo.');
+}
+function delContato(id){
+  const c=DB.contatos.find(x=>x.id===id);
+  confirmar(`Excluir o contato "${c.nome}"?`,()=>{
+    DB.contatos=DB.contatos.filter(x=>x.id!==id);logAtiv('🗑️',`Contato excluído: ${c.nome}`);save();renderContatos();toast('Contato excluído.','info');
+  });
+}
+function verContato(id){
+  const c=DB.contatos.find(x=>x.id===id);
+  const wpp=wppLink(c.wpp||c.tel1);
+  setModal('👷 '+c.nome,`
+    <div class="detail-grid">
+      <div class="detail-box"><h4>📞 Contato</h4><div class="detail-list">
+        <div class="dl-item"><span>Telefone</span><strong>${esc(c.tel1||'—')}</strong></div>
+        <div class="dl-item"><span>Secundário</span><strong>${esc(c.tel2||'—')}</strong></div>
+        <div class="dl-item"><span>WhatsApp</span><strong>${c.wpp?esc(c.wpp):'—'}</strong></div>
+      </div></div>
+      <div class="detail-box"><h4>📍 Localização</h4><div class="detail-list">
+        <div class="dl-item"><span>Cidade</span><strong>${esc(c.cidade||'—')}</strong></div>
+        <div class="dl-item"><span>UF</span><strong>${esc(c.uf||'—')}</strong></div>
+        <div class="dl-item"><span>Região</span><strong>${esc(c.endereco||'—')}</strong></div>
+      </div></div>
+      <div class="detail-box"><h4>🧩 Atuação</h4><div class="detail-list">
+        <div class="dl-item"><span>Função</span><strong>${esc(c.funcao||'—')}</strong></div>
+        <div class="dl-item"><span>Empresa</span><strong>${esc(c.empresa||'—')}</strong></div>
+        <div class="dl-item"><span>Disponibilidade</span><strong>${esc(c.disp||'—')}</strong></div>
+        <div class="dl-item"><span>Situação</span><strong>${c.situacao==='ativo'?'Ativo':'Inativo'}</strong></div>
+      </div></div>
+    </div>
+    <div class="detail-box" style="margin-top:14px"><h4>🏷️ Grupos e Especialidades</h4>
+      <div class="chips" style="margin-bottom:9px">${(c.grupos||[]).map(g=>`<span class="tag tag-ouro">${esc(g)}</span>`).join(' ')||'<span class="tag tag-cinza">Sem grupo</span>'}</div>
+      <div style="font-size:13px"><strong>Especialidades:</strong> ${esc(c.especialidades||'—')}</div>
+      <div style="font-size:13px;margin-top:4px"><strong>Serviços:</strong> ${esc(c.servicos||'—')}</div>
+      ${c.obs?`<div style="font-size:13px;margin-top:8px;color:var(--texto-suave)">📝 ${esc(c.obs)}</div>`:''}
+    </div>`,
+    `${wpp?`<a class="btn btn-verde" href="${wpp}" target="_blank">💬 Abrir WhatsApp</a>`:''}
+     <button class="btn btn-ouro" onclick="openContato(${c.id})">✏️ Editar</button>
+     <button class="btn" onclick="closeModal()">Fechar</button>`);
+}
+
+/* =======================================================================
+   CIDADES
+   ======================================================================= */
+function preencherUFselects(){
+  ['fCidadeUF','fEmpresaUF'].forEach(idd=>{
+    const el=document.getElementById(idd);if(!el)return;
+    const atual=el.value;
+    const ufs=uniq([...DB.cidades.map(c=>c.uf),...DB.empresas.map(e=>e.uf)].filter(Boolean)).sort();
+    el.innerHTML='<option value="">Todos os estados</option>'+ufs.map(u=>`<option ${u===atual?'selected':''}>${u}</option>`).join('');
+  });
+}
+function renderCidades(){
+  preencherUFselects();
+  const q=(document.getElementById('fCidadeBusca').value||'').toLowerCase();
+  const uf=document.getElementById('fCidadeUF').value;
+  let lista=DB.cidades.filter(c=>{
+    if(uf&&c.uf!==uf)return false;
+    if(q&&!(c.nome+' '+c.uf+' '+(c.obs||'')).toLowerCase().includes(q))return false;
+    return true;
+  }).sort((a,b)=>a.nome.localeCompare(b.nome));
+  const tb=document.getElementById('tbCidades');
+  if(!lista.length){tb.innerHTML=`<tr><td colspan="7" class="t-empty">Nenhum município encontrado.</td></tr>`;return;}
+  tb.innerHTML=lista.map(c=>{
+    const nContatos=DB.contatos.filter(x=>x.cidade===c.nome).length;
+    const nPrep=DB.contatos.filter(x=>x.cidade===c.nome&&(x.grupos||[]).includes('Prepostos')).length;
+    const nEmp=DB.empresas.filter(e=>e.cidade===c.nome).length;
+    return`<tr>
+      <td><strong>${esc(c.nome)}</strong></td>
+      <td><span class="tag tag-azul">${esc(c.uf)}</span></td>
+      <td>${nContatos}</td><td>${nPrep}</td><td>${nEmp}</td>
+      <td style="max-width:200px;color:var(--texto-suave);font-size:12px">${esc(c.obs||'—')}</td>
+      <td><div class="row-actions">
+        <button class="ic-btn view" onclick="verCidade(${c.id})" title="Consultar">👁️</button>
+        <button class="ic-btn edit" onclick="openCidade(${c.id})" title="Editar">✏️</button>
+        <button class="ic-btn del" onclick="delCidade(${c.id})" title="Excluir">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function openCidade(id){
+  const c=id?DB.cidades.find(x=>x.id===id):{};
+  setModal(id?'Editar Município':'Novo Município',`
+    <div class="form-grid">
+      <div class="fld"><label>Município <span class="req">*</span></label><input id="ci_nome" value="${esc(c.nome||'')}"></div>
+      <div class="fld"><label>Estado (UF) <span class="req">*</span></label><select id="ci_uf">${UF_LIST.map(u=>`<option ${c.uf===u?'selected':''}>${u}</option>`).join('')}</select></div>
+      <div class="fld"><label>Latitude (opcional)</label><input id="ci_lat" value="${c.lat!=null?c.lat:''}" placeholder="-15.60"></div>
+      <div class="fld"><label>Longitude (opcional)</label><input id="ci_lng" value="${c.lng!=null?c.lng:''}" placeholder="-56.10"></div>
+      <div class="fld full"><label>Observações</label><textarea id="ci_obs">${esc(c.obs||'')}</textarea></div>
+      <div class="fld full"><div style="font-size:11.5px;color:var(--texto-suave)">💡 As coordenadas são usadas só para ordenar profissionais por proximidade (linha reta). Pode deixar em branco — o município funciona normalmente, só não entra no cálculo de distância.</div></div>
+    </div>`,
+    `<button class="btn" onclick="closeModal()">Cancelar</button>
+     <button class="btn btn-ouro" onclick="saveCidade(${id||0})">💾 Salvar</button>`);
+}
+function saveCidade(id){
+  const nome=val('ci_nome').trim(); if(!nome){toast('Informe o nome do município.','err');return;}
+  const lat=parseFloat(String(val('ci_lat')).replace(',','.')), lng=parseFloat(String(val('ci_lng')).replace(',','.'));
+  const obj={nome,uf:val('ci_uf'),obs:val('ci_obs'),lat:isNaN(lat)?null:lat,lng:isNaN(lng)?null:lng};
+  if(id){Object.assign(DB.cidades.find(x=>x.id===id),obj);logAtiv('✏️',`Município atualizado: ${nome}`);}
+  else{obj.id=nextId('cidade');DB.cidades.push(obj);logAtiv('🏙️',`Novo município: ${nome}/${obj.uf}`);}
+  save();closeModal();renderCidades();toast('Município salvo.');
+}
+function delCidade(id){
+  const c=DB.cidades.find(x=>x.id===id);
+  const nContatos=DB.contatos.filter(x=>x.cidade===c.nome).length;
+  const aviso=nContatos?` Há ${nContatos} contato(s) ligados a ela (não serão apagados, mas ficarão sem cidade na lista).`:'';
+  confirmar(`Excluir o município "${c.nome}"?${aviso}`,()=>{
+    DB.cidades=DB.cidades.filter(x=>x.id!==id);logAtiv('🗑️',`Município excluído: ${c.nome}`);save();renderCidades();toast('Município excluído.','info');
+  });
+}
+function verCidade(id){
+  const c=DB.cidades.find(x=>x.id===id);
+  const demCidade=(DB.demandas||[]).filter(x=>x.cidade===c.nome);
+  const contatos=DB.contatos.filter(x=>x.cidade===c.nome);
+  const prepostos=contatos.filter(x=>(x.grupos||[]).includes('Prepostos'));
+  const empresas=DB.empresas.filter(e=>e.cidade===c.nome);
+  const especialidades=uniq(contatos.flatMap(x=>(x.especialidades||'').split(/[,;]/).map(s=>s.trim()).filter(Boolean)));
+  const grupos=uniq(contatos.flatMap(x=>x.grupos||[]));
+  const listify=(arr,fmt,vazio)=>arr.length?arr.map(fmt).join(''):`<div class="empty">${vazio}</div>`;
+  setModal('🏙️ '+c.nome+' / '+c.uf,`
+    <div class="detail-grid">
+      <div class="detail-box"><h4>👷 Contatos (${contatos.length})</h4><div class="detail-list">
+        ${listify(contatos,x=>`<div class="dl-item"><span>${esc(x.nome)}</span><span class="tag tag-cinza">${esc(x.funcao||'—')}</span></div>`,'Nenhum contato nesta cidade.')}
+      </div></div>
+      <div class="detail-box"><h4>🧑‍🔧 Prepostos (${prepostos.length})</h4><div class="detail-list">
+        ${listify(prepostos,x=>`<div class="dl-item"><span>${esc(x.nome)}</span><span class="tag tag-verde">${esc(x.disp||'')}</span></div>`,'Nenhum preposto nesta cidade.')}
+      </div></div>
+      <div class="detail-box"><h4>🏢 Empresas (${empresas.length})</h4><div class="detail-list">
+        ${listify(empresas,e=>`<div class="dl-item"><span>${esc(e.nome)}</span></div>`,'Nenhuma empresa nesta cidade.')}
+      </div></div>
+      <div class="detail-box"><h4>🧩 Grupos presentes</h4>
+        <div class="chips">${grupos.map(g=>`<span class="tag tag-ouro">${esc(g)}</span>`).join(' ')||'<span class="empty">—</span>'}</div>
+      </div>
+      <div class="detail-box"><h4>🏷️ Especialidades</h4>
+        <div class="chips">${especialidades.map(e=>`<span class="tag tag-azul">${esc(e)}</span>`).join(' ')||'<span class="empty">—</span>'}</div>
+      </div>
+      <div class="detail-box"><h4>📝 Observações</h4><div style="font-size:13px;color:var(--texto-suave)">${esc(c.obs||'Sem observações.')}</div></div>
+      <div class="detail-box" style="grid-column:1/-1"><h4>📋 Histórico de Serviços / Demandas (${pad2(demCidade.length)})</h4><div class="detail-list">
+        ${demCidade.length?demCidade.map(x=>`<div class="dl-item"><span><strong>${demandaCod(x)}</strong> — ${esc(x.tipoServico||'—')}</span><span class="tag ${STATUS_COR[x.status]||'tag-cinza'}">${esc(x.status)}</span></div>`).join(''):'<div class="empty">Nenhuma demanda registrada nesta cidade.</div>'}
+      </div></div>
+    </div>`,
+    `<button class="btn btn-ouro" onclick="openCidade(${c.id})">✏️ Editar</button>
+     <button class="btn" onclick="closeModal()">Fechar</button>`);
+}
+
+/* =======================================================================
+   GRUPOS
+   ======================================================================= */
+function renderGrupos(){
+  const grid=document.getElementById('gruposGrid');
+  if(!DB.grupos.length){grid.innerHTML='<div class="t-empty">Nenhum grupo cadastrado.</div>';return;}
+  grid.innerHTML=DB.grupos.map(g=>{
+    const n=DB.contatos.filter(c=>(c.grupos||[]).includes(g.nome)).length;
+    return`<div class="grupo-card">
+      <div class="gc-top">
+        <div class="gc-ico">${g.icone||'🧩'}</div>
+        <div><h4>${esc(g.nome)}</h4><div class="gc-count">${pad2(n)} profissional(is)</div></div>
+      </div>
+      <div class="gc-desc">${esc(g.desc||'')}</div>
+      ${g.responsavel?`<div style="font-size:12px;margin-top:6px;color:var(--texto-suave)">👤 Resp.: ${esc(g.responsavel)}</div>`:''}
+      <div class="gc-foot">
+        <button class="btn btn-sm" onclick="verGrupo(${g.id})">👁️ Ver</button>
+        <button class="btn btn-sm" onclick="openGrupo(${g.id})">✏️ Editar</button>
+        <button class="btn btn-sm btn-vermelho" onclick="delGrupo(${g.id})">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openGrupo(id){
+  const g=id?DB.grupos.find(x=>x.id===id):{icone:'🧩'};
+  setModal(id?'Editar Grupo':'Novo Grupo',`
+    <div class="form-grid">
+      <div class="fld"><label>Nome do grupo <span class="req">*</span></label><input id="g_nome" value="${esc(g.nome||'')}"></div>
+      <div class="fld"><label>Ícone (emoji)</label><input id="g_ico" value="${esc(g.icone||'🧩')}" maxlength="4"></div>
+      <div class="fld full"><label>Responsável</label><input id="g_resp" value="${esc(g.responsavel||'')}"></div>
+      <div class="fld full"><label>Descrição</label><textarea id="g_desc">${esc(g.desc||'')}</textarea></div>
+    </div>`,
+    `<button class="btn" onclick="closeModal()">Cancelar</button>
+     <button class="btn btn-ouro" onclick="saveGrupo(${id||0})">💾 Salvar</button>`);
+}
+function saveGrupo(id){
+  const nome=val('g_nome').trim(); if(!nome){toast('Informe o nome do grupo.','err');return;}
+  const antigo = id?DB.grupos.find(x=>x.id===id).nome:null;
+  const obj={nome,icone:val('g_ico')||'🧩',responsavel:val('g_resp'),desc:val('g_desc')};
+  if(id){
+    Object.assign(DB.grupos.find(x=>x.id===id),obj);
+    if(antigo&&antigo!==nome){DB.contatos.forEach(c=>{if(c.grupos){c.grupos=c.grupos.map(gg=>gg===antigo?nome:gg);}});}
+    logAtiv('✏️',`Grupo atualizado: ${nome}`);
+  } else {obj.id=nextId('grupo');DB.grupos.push(obj);logAtiv('🧩',`Novo grupo: ${nome}`);}
+  save();closeModal();renderGrupos();toast('Grupo salvo.');
+}
+function delGrupo(id){
+  const g=DB.grupos.find(x=>x.id===id);
+  const n=DB.contatos.filter(c=>(c.grupos||[]).includes(g.nome)).length;
+  confirmar(`Excluir o grupo "${g.nome}"?${n?` ${n} contato(s) serão desvinculados dele.`:''}`,()=>{
+    DB.grupos=DB.grupos.filter(x=>x.id!==id);
+    DB.contatos.forEach(c=>{if(c.grupos)c.grupos=c.grupos.filter(gg=>gg!==g.nome);});
+    logAtiv('🗑️',`Grupo excluído: ${g.nome}`);save();renderGrupos();toast('Grupo excluído.','info');
+  });
+}
+function verGrupo(id){
+  const g=DB.grupos.find(x=>x.id===id);
+  const membros=DB.contatos.filter(c=>(c.grupos||[]).includes(g.nome));
+  setModal(`${g.icone||'🧩'} ${g.nome}`,`
+    <p style="color:var(--texto-suave);font-size:13px;margin-bottom:12px">${esc(g.desc||'')}</p>
+    <div class="detail-box"><h4>👥 Profissionais no grupo (${pad2(membros.length)})</h4><div class="detail-list">
+      ${membros.length?membros.map(m=>`<div class="dl-item"><span>${esc(m.nome)}</span><span class="tag tag-cinza">${esc(m.cidade||'—')}/${esc(m.uf||'')}</span></div>`).join(''):'<div class="empty">Nenhum profissional vinculado ainda.</div>'}
+    </div></div>`,
+    `<button class="btn btn-ouro" onclick="openGrupo(${g.id})">✏️ Editar</button>
+     <button class="btn" onclick="closeModal()">Fechar</button>`);
+}
+
+/* =======================================================================
+   EMPRESAS
+   ======================================================================= */
+function renderEmpresas(){
+  preencherUFselects();
+  const q=(document.getElementById('fEmpresaBusca').value||'').toLowerCase();
+  const uf=document.getElementById('fEmpresaUF').value;
+  let lista=DB.empresas.filter(e=>{
+    if(uf&&e.uf!==uf)return false;
+    if(q&&!([e.nome,e.responsavel,e.cnpj,e.email,e.servicos].join(' ').toLowerCase().includes(q)))return false;
+    return true;
+  }).sort((a,b)=>a.nome.localeCompare(b.nome));
+  const tb=document.getElementById('tbEmpresas');
+  if(!lista.length){tb.innerHTML=`<tr><td colspan="6" class="t-empty">Nenhuma empresa cadastrada.</td></tr>`;return;}
+  tb.innerHTML=lista.map(e=>{
+    const wpp=wppLink(e.telefone);
+    return`<tr>
+      <td><strong>${esc(e.nome)}</strong>${e.cnpj?`<div style="font-size:11px;color:var(--texto-suave)">${esc(e.cnpj)}</div>`:''}</td>
+      <td>${esc(e.responsavel||'—')}</td>
+      <td>${esc(e.telefone||'—')}</td>
+      <td>${esc(e.cidade||'—')}${e.uf?'/'+esc(e.uf):''}</td>
+      <td style="max-width:200px;font-size:12px;color:var(--texto-suave)">${esc(e.servicos||'—')}</td>
+      <td><div class="row-actions">
+        ${wpp?`<a class="ic-btn wpp" href="${wpp}" target="_blank" title="WhatsApp">💬</a>`:''}
+        <button class="ic-btn edit" onclick="openEmpresa(${e.id})" title="Editar">✏️</button>
+        <button class="ic-btn del" onclick="delEmpresa(${e.id})" title="Excluir">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function openEmpresa(id){
+  const e=id?DB.empresas.find(x=>x.id===id):{};
+  const cidadesOpt='<option value="">—</option>'+DB.cidades.map(ci=>`<option ${e.cidade===ci.nome?'selected':''} data-uf="${ci.uf}">${esc(ci.nome)}</option>`).join('');
+  setModal(id?'Editar Empresa':'Nova Empresa',`
+    <div class="form-grid">
+      <div class="fld full"><label>Nome da empresa <span class="req">*</span></label><input id="e_nome" value="${esc(e.nome||'')}"></div>
+      <div class="fld"><label>CNPJ (opcional)</label><input id="e_cnpj" value="${esc(e.cnpj||'')}"></div>
+      <div class="fld"><label>Responsável</label><input id="e_resp" value="${esc(e.responsavel||'')}"></div>
+      <div class="fld"><label>Telefone</label><input id="e_tel" value="${esc(e.telefone||'')}"></div>
+      <div class="fld"><label>E-mail</label><input id="e_email" value="${esc(e.email||'')}"></div>
+      <div class="fld"><label>Cidade</label><select id="e_cidade" onchange="autoUF(this,'e_uf')">${cidadesOpt}</select></div>
+      <div class="fld"><label>UF</label><input id="e_uf" value="${esc(e.uf||'')}" maxlength="2" style="text-transform:uppercase"></div>
+      <div class="fld full"><label>Serviços contratados</label><input id="e_serv" value="${esc(e.servicos||'')}"></div>
+      <div class="fld full"><label>Observações</label><textarea id="e_obs">${esc(e.obs||'')}</textarea></div>
+    </div>`,
+    `<button class="btn" onclick="closeModal()">Cancelar</button>
+     <button class="btn btn-ouro" onclick="saveEmpresa(${id||0})">💾 Salvar</button>`);
+}
+function saveEmpresa(id){
+  const nome=val('e_nome').trim(); if(!nome){toast('Informe o nome da empresa.','err');return;}
+  const obj={nome,cnpj:val('e_cnpj'),responsavel:val('e_resp'),telefone:val('e_tel'),
+    email:val('e_email'),cidade:val('e_cidade'),uf:val('e_uf').toUpperCase(),servicos:val('e_serv'),obs:val('e_obs')};
+  if(id){Object.assign(DB.empresas.find(x=>x.id===id),obj);logAtiv('✏️',`Empresa atualizada: ${nome}`);}
+  else{obj.id=nextId('empresa');DB.empresas.push(obj);logAtiv('🏢',`Nova empresa: ${nome}`);}
+  save();closeModal();renderEmpresas();toast('Empresa salva.');
+}
+function delEmpresa(id){
+  const e=DB.empresas.find(x=>x.id===id);
+  confirmar(`Excluir a empresa "${e.nome}"?`,()=>{
+    DB.empresas=DB.empresas.filter(x=>x.id!==id);logAtiv('🗑️',`Empresa excluída: ${e.nome}`);save();renderEmpresas();toast('Empresa excluída.','info');
+  });
+}
+
+/* =======================================================================
+   CONFIG / BACKUP / IMPORT-EXPORT
+   ======================================================================= */
+function renderConfig(){
+  const ul=document.getElementById('tiposServList');
+  ul.innerHTML=DB.tiposServico.map((t,i)=>`<li><span>${esc(t)}</span><button class="ic-btn del" onclick="delTipoServico(${i})" title="Remover">✖</button></li>`).join('')||'<li>Nenhum tipo.</li>';
+  const e=DB.emitente||{};
+  const setv=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||'';};
+  setv('em_nome',e.nome);setv('em_registro',e.registro);setv('em_tel',e.telefone);setv('em_email',e.email);setv('em_cidade',e.cidade);
+}
+function saveEmitente(){
+  DB.emitente={nome:val('em_nome'),registro:val('em_registro'),telefone:val('em_tel'),email:val('em_email'),cidade:val('em_cidade')};
+  save();toast('Dados do emitente salvos.');
+}
+function addTipoServico(){
+  prompt1('Novo tipo de serviço:','',v=>{if(v&&v.trim()){DB.tiposServico.push(v.trim());save();renderConfig();toast('Tipo adicionado.');}});
+}
+function delTipoServico(i){DB.tiposServico.splice(i,1);save();renderConfig();}
+
+function exportBackup(){
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  dl(blob,`backup_rede_vistoriadores_${hoje()}.json`);
+  toast('Backup baixado.');
+}
+function importBackup(ev){
+  const f=ev.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(!d.contatos||!d.cidades){throw'Arquivo inválido';}
+      confirmar('Restaurar este backup? Os dados atuais serão substituídos.',()=>{
+        DB=d; save(); toast('Backup restaurado com sucesso.'); goTo('dashboard');
+      });
+    }catch(e){toast('Arquivo de backup inválido.','err');}
+    ev.target.value='';
+  };
+  r.readAsText(f);
+}
+function exportCSV(tipo){
+  let rows=[],head=[];
+  if(tipo==='contatos'){
+    head=['Nome','Telefone principal','Telefone secundário','WhatsApp','Função','Cidade','UF','Grupos','Empresa','Especialidades','Serviços','Disponibilidade','Situação','Observações'];
+    rows=DB.contatos.map(c=>[c.nome,c.tel1,c.tel2,c.wpp,c.funcao,c.cidade,c.uf,(c.grupos||[]).join(' | '),c.empresa,c.especialidades,c.servicos,c.disp,c.situacao,c.obs]);
+  }else if(tipo==='cidades'){
+    head=['Município','UF','Observações'];
+    rows=DB.cidades.map(c=>[c.nome,c.uf,c.obs]);
+  }else if(tipo==='empresas'){
+    head=['Empresa','CNPJ','Responsável','Telefone','E-mail','Cidade','UF','Serviços','Observações'];
+    rows=DB.empresas.map(e=>[e.nome,e.cnpj,e.responsavel,e.telefone,e.email,e.cidade,e.uf,e.servicos,e.obs]);
+  }
+  const csv=[head,...rows].map(r=>r.map(csvCell).join(';')).join('\r\n');
+  dl(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}),`${tipo}_${hoje()}.csv`);
+  toast('CSV exportado.');
+}
+function csvCell(v){v=(v==null?'':String(v));return/[";\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function modeloCSV(){
+  const head=['Nome','Telefone','WhatsApp','Funcao','Cidade','UF','Empresa','Especialidades','Grupos'];
+  const ex=['João Exemplo','(66) 99999-0000','66999990000','Vistoriador','Cuiabá','MT','Autônomo','Vistoria veicular','Prepostos | Grupo de Reguladores'];
+  const csv=[head,ex].map(r=>r.map(csvCell).join(';')).join('\r\n');
+  dl(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}),'modelo_contatos.csv');
+}
+function importCSV(ev){
+  const f=ev.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const txt=r.result.replace(/^\uFEFF/,'');
+      const linhas=txt.split(/\r?\n/).filter(l=>l.trim());
+      const sep=linhas[0].includes(';')?';':',';
+      const head=parseCSVLine(linhas[0],sep).map(h=>h.toLowerCase().trim());
+      const idx=n=>head.findIndex(h=>h.includes(n));
+      const iNome=idx('nome'),iTel=idx('tel'),iWpp=idx('whats'),iFunc=idx('fun'),iCid=idx('cidade'),iUf=idx('uf'),iEmp=idx('empres'),iEsp=idx('espec'),iGrp=idx('grupo');
+      let add=0;
+      for(let k=1;k<linhas.length;k++){
+        const col=parseCSVLine(linhas[k],sep);
+        const nome=(col[iNome]||'').trim(); if(!nome)continue;
+        DB.contatos.push({id:nextId('contato'),nome,
+          tel1:iTel>=0?col[iTel]:'',wpp:iWpp>=0?col[iWpp]:soDigitos(col[iTel]||''),
+          funcao:iFunc>=0?col[iFunc]:'',cidade:iCid>=0?col[iCid]:'',uf:(iUf>=0?col[iUf]:'').toUpperCase(),
+          empresa:iEmp>=0?col[iEmp]:'',especialidades:iEsp>=0?col[iEsp]:'',
+          grupos:iGrp>=0&&col[iGrp]?col[iGrp].split(/[|,]/).map(s=>s.trim()).filter(Boolean):[],
+          servicos:'',disp:'A confirmar',situacao:'ativo',obs:'Importado via CSV'});
+        add++;
+      }
+      logAtiv('⬆️',`${add} contato(s) importados por planilha`);
+      save();toast(`${add} contato(s) importados.`);goTo('contatos');
+    }catch(e){toast('Não consegui ler o CSV. Confira o modelo.','err');}
+    ev.target.value='';
+  };
+  r.readAsText(f,'UTF-8');
+}
+function parseCSVLine(line,sep){
+  const out=[];let cur='',q=false;
+  for(let i=0;i<line.length;i++){const ch=line[i];
+    if(q){if(ch==='"'){if(line[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=ch;}
+    else{if(ch==='"')q=true;else if(ch===sep){out.push(cur);cur='';}else cur+=ch;}
+  }
+  out.push(cur);return out;
+}
+function carregarDemo(){
+  if(DB.contatos.some(c=>c.demo)){toast('Exemplos já estão carregados.','info');return;}
+  seedDemo();save();renderContatos();toast('Exemplos recarregados.');goTo('contatos');
+}
+function limparDemo(){
+  const n=DB.contatos.filter(c=>c.demo).length;
+  if(!n){toast('Não há exemplos para remover.','info');return;}
+  confirmar(`Remover os ${n} contatos de exemplo (DEMO)?`,()=>{
+    DB.contatos=DB.contatos.filter(c=>!c.demo);save();renderContatos();toast('Exemplos removidos.','info');
+  });
+}
+function resetTudo(){
+  confirmar('ATENÇÃO: isso apaga TODOS os dados e reinicia o sistema. Tem certeza?',()=>{
+    confirmar('Última confirmação: apagar tudo mesmo? (Faça backup antes!)',()=>{
+      seedInicial(false);toast('Sistema reiniciado.','info');goTo('dashboard');
+    });
+  });
+}
+
+/* =======================================================================
+   CENTRAL DE DEMANDAS E OCORRÊNCIAS  (Etapa 2)
+   ======================================================================= */
+const STATUS_DEMANDA = ['Nova demanda','Aguardando análise','Aguardando profissional','Profissional acionado','Atendimento confirmado','Em deslocamento','Em execução','Aguardando documentação','Em análise','Concluída','Cancelada'];
+const STATUS_COR = {
+  'Nova demanda':'tag-azul','Aguardando análise':'tag-laranja','Aguardando profissional':'tag-laranja',
+  'Profissional acionado':'tag-ouro','Atendimento confirmado':'tag-ouro','Em deslocamento':'tag-ouro',
+  'Em execução':'tag-ouro','Aguardando documentação':'tag-laranja','Em análise':'tag-laranja',
+  'Concluída':'tag-verde','Cancelada':'tag-vermelho'
+};
+const URGENCIAS = ['Normal','Urgente','Emergencial'];
+const URG_COR = {'Normal':'tag-cinza','Urgente':'tag-laranja','Emergencial':'tag-vermelho'};
+const demAberta = d => !['Concluída','Cancelada'].includes(d.status);
+
+function demandaCod(d){ return 'OC-'+String(d.num||d.id||0).padStart(4,'0'); }
+function dataHora(iso){ if(!iso)return'—'; const d=new Date(iso); return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+function logDemanda(d,acao,obs){ (d.historico=d.historico||[]).unshift({data:new Date().toISOString(),acao,obs:obs||''}); }
+
+/* Distância em LINHA RETA (Haversine) — nunca distância por estrada/tempo */
+function distKm(a,b){
+  if(!a||!b||a.lat==null||b.lat==null||a.lng==null||b.lng==null) return null;
+  const R=6371,toRad=x=>x*Math.PI/180;
+  const dLat=toRad(b.lat-a.lat),dLng=toRad(b.lng-a.lng);
+  const s=Math.sin(dLat/2)**2+Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLng/2)**2;
+  return Math.round(2*R*Math.asin(Math.sqrt(s)));
+}
+
+function updateNavBadges(){
+  const n=(DB.demandas||[]).filter(d=>demAberta(d)&&!d.profissional&&!d.preposto).length;
+  const b=document.getElementById('nav-dem');
+  if(b){ b.textContent=n; b.style.display=n?'inline-block':'none'; }
+}
+
+function preencherFiltrosDem(){
+  const cid=document.getElementById('fDemCidade'); const atual=cid.value;
+  cid.innerHTML='<option value="">Todas as cidades</option>'+DB.cidades.map(c=>`<option ${c.nome===atual?'selected':''}>${esc(c.nome)}</option>`).join('');
+  const st=document.getElementById('fDemStatus');
+  if(st.options.length<=1) st.innerHTML='<option value="">Todos os status</option>'+STATUS_DEMANDA.map(s=>`<option>${s}</option>`).join('');
+  const ur=document.getElementById('fDemUrg');
+  if(ur.options.length<=1) ur.innerHTML='<option value="">Todas as urgências</option>'+URGENCIAS.map(u=>`<option>${u}</option>`).join('');
+}
+
+function renderDemandas(){
+  preencherFiltrosDem(); updateNavBadges();
+  const dem=DB.demandas||[];
+  const resumo=[
+    ['📥 Recebidas',dem.length,''],
+    ['⏳ Em aberto',dem.filter(demAberta).length,'c-laranja'],
+    ['📤 Sem profissional',dem.filter(d=>demAberta(d)&&!d.profissional&&!d.preposto).length,'c-vermelho'],
+    ['✅ Concluídas',dem.filter(d=>d.status==='Concluída').length,'c-verde'],
+    ['🚨 Emergenciais',dem.filter(d=>demAberta(d)&&d.urgencia==='Emergencial').length,'c-vermelho']
+  ];
+  document.getElementById('demKpi').innerHTML=resumo.map(([l,v,cls])=>`
+    <div class="card ${cls}"><div class="k-top"><span class="k-lbl">${l}</span></div><div class="k-val">${v}</div></div>`).join('');
+
+  const q=(document.getElementById('fDemBusca').value||'').toLowerCase();
+  const fs=document.getElementById('fDemStatus').value;
+  const fc=document.getElementById('fDemCidade').value;
+  const fu=document.getElementById('fDemUrg').value;
+  let lista=dem.filter(d=>{
+    if(fs&&d.status!==fs)return false;
+    if(fc&&d.cidade!==fc)return false;
+    if(fu&&d.urgencia!==fu)return false;
+    if(q){const blob=[demandaCod(d),d.empresaSolic,d.solicitante,d.tipoServico,d.descricao,d.cidade,d.endereco,d.rodovia,d.profissional,d.preposto].join(' ').toLowerCase();if(!blob.includes(q))return false;}
+    return true;
+  }).sort((a,b)=>(b.num||0)-(a.num||0));
+
+  const tb=document.getElementById('tbDemandas');
+  if(!lista.length){tb.innerHTML=`<tr><td colspan="8" class="t-empty">Nenhuma demanda encontrada. Clique em “＋ Nova Demanda” para registrar a primeira.</td></tr>`;return;}
+  tb.innerHTML=lista.map(d=>{
+    const resp=d.profissional||d.preposto||'<span class="tag tag-vermelho">A designar</span>';
+    return`<tr>
+      <td><strong>${demandaCod(d)}</strong></td>
+      <td style="font-size:12px">${dataHora(d.dataRecebimento)}</td>
+      <td>${esc(d.tipoServico||'—')}</td>
+      <td>${esc(d.cidade||'—')}${d.uf?'/'+esc(d.uf):''}</td>
+      <td><span class="tag ${URG_COR[d.urgencia]||'tag-cinza'}">${esc(d.urgencia||'—')}</span></td>
+      <td style="font-size:12.5px">${resp}</td>
+      <td><span class="tag ${STATUS_COR[d.status]||'tag-cinza'}">${esc(d.status)}</span></td>
+      <td><div class="row-actions">
+        <button class="ic-btn view" onclick="verDemanda(${d.id})" title="Abrir">👁️</button>
+        <button class="ic-btn edit" onclick="openDemanda(${d.id})" title="Editar">✏️</button>
+        <button class="ic-btn" onclick="distribuir(${d.id})" title="Encontrar profissionais">🧭</button>
+        <button class="ic-btn del" onclick="delDemanda(${d.id})" title="Excluir">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function openDemanda(id){
+  const d = id?DB.demandas.find(x=>x.id===id):{status:'Nova demanda',urgencia:'Normal'};
+  const cidadesOpt='<option value="">—</option>'+DB.cidades.map(ci=>`<option ${d.cidade===ci.nome?'selected':''} data-uf="${ci.uf}">${esc(ci.nome)}</option>`).join('');
+  const tiposOpt='<option value="">—</option>'+DB.tiposServico.map(t=>`<option ${d.tipoServico===t?'selected':''}>${esc(t)}</option>`).join('');
+  const contatosOpt=n=>'<option value="">—</option>'+DB.contatos.filter(c=>c.situacao==='ativo').map(c=>`<option ${n===c.nome?'selected':''}>${esc(c.nome)}${c.cidade?' ('+esc(c.cidade)+')':''}</option>`).join('');
+  const gruposOpt='<option value="">—</option>'+DB.grupos.map(g=>`<option ${d.grupoApoio===g.nome?'selected':''}>${esc(g.nome)}</option>`).join('');
+  const empresasOpt=DB.empresas.map(e=>`<option ${d.empresaSolic===e.nome?'selected':''}>${esc(e.nome)}</option>`).join('');
+  const statusOpt=STATUS_DEMANDA.map(s=>`<option ${d.status===s?'selected':''}>${s}</option>`).join('');
+  const urgOpt=URGENCIAS.map(u=>`<option ${d.urgencia===u?'selected':''}>${u}</option>`).join('');
+  setModal(id?('Editar Demanda '+demandaCod(d)):'Nova Demanda / Ocorrência',`
+    <div class="form-grid">
+      <div class="fld"><label>Tipo de serviço <span class="req">*</span></label><select id="d_tipo">${tiposOpt}</select></div>
+      <div class="fld"><label>Grau de urgência</label><select id="d_urg">${urgOpt}</select></div>
+      <div class="fld full"><label>Descrição da solicitação</label><textarea id="d_desc" placeholder="O que foi solicitado...">${esc(d.descricao||'')}</textarea></div>
+      <div class="fld"><label>Empresa solicitante</label><input id="d_empresa" list="dl_empresas" value="${esc(d.empresaSolic||'')}"><datalist id="dl_empresas">${empresasOpt}</datalist></div>
+      <div class="fld"><label>Nome do solicitante</label><input id="d_solic" value="${esc(d.solicitante||'')}"></div>
+      <div class="fld"><label>Telefone para contato</label><input id="d_tel" value="${esc(d.telefone||'')}" placeholder="(66) 99999-9999"></div>
+      <div class="fld"><label>Prazo para atendimento</label><input type="date" id="d_prazo" value="${esc(d.prazo||'')}"></div>
+      <div class="fld"><label>Município</label><select id="d_cidade" onchange="autoUF(this,'d_uf')">${cidadesOpt}</select></div>
+      <div class="fld"><label>Estado (UF)</label><input id="d_uf" value="${esc(d.uf||'')}" maxlength="2" style="text-transform:uppercase"></div>
+      <div class="fld full"><label>Endereço / localização</label><input id="d_end" value="${esc(d.endereco||'')}"></div>
+      <div class="fld"><label>Rodovia</label><input id="d_rod" value="${esc(d.rodovia||'')}" placeholder="BR-158 / MT-100"></div>
+      <div class="fld"><label>Quilômetro</label><input id="d_km" value="${esc(d.km||'')}" placeholder="km 245"></div>
+      <div class="fld"><label>Profissional responsável</label><select id="d_prof">${contatosOpt(d.profissional)}</select></div>
+      <div class="fld"><label>Preposto designado</label><select id="d_prep">${contatosOpt(d.preposto)}</select></div>
+      <div class="fld"><label>Grupo de apoio</label><select id="d_grupo">${gruposOpt}</select></div>
+      <div class="fld"><label>Status da demanda</label><select id="d_status">${statusOpt}</select></div>
+      <div class="fld full"><label>Anexos / documentos (referências)</label><input id="d_anexos" value="${esc(d.anexos||'')}" placeholder="Ex.: link do Drive, nome do arquivo, protocolo..."></div>
+      <div class="fld full"><label>Observações</label><textarea id="d_obs">${esc(d.obs||'')}</textarea></div>
+    </div>
+    <div style="font-size:11.5px;color:var(--texto-suave);margin-top:4px">💡 O envio de fotografias direto na ocorrência entra na Etapa 3 (módulo de vistorias). Por enquanto, registre aqui a referência do arquivo.</div>`,
+    `<button class="btn" onclick="closeModal()">Cancelar</button>
+     <button class="btn btn-ouro" onclick="saveDemanda(${id||0})">💾 Salvar</button>`);
+}
+
+function saveDemanda(id){
+  const tipo=val('d_tipo').trim();
+  if(!tipo){toast('Informe o tipo de serviço.','err');return;}
+  const antigo=id?DB.demandas.find(x=>x.id===id):null;
+  const statusNovo=val('d_status');
+  const obj={
+    tipoServico:tipo, urgencia:val('d_urg'), descricao:val('d_desc'),
+    empresaSolic:val('d_empresa'), solicitante:val('d_solic'), telefone:val('d_tel'),
+    prazo:val('d_prazo'), cidade:val('d_cidade'), uf:val('d_uf').toUpperCase(),
+    endereco:val('d_end'), rodovia:val('d_rod'), km:val('d_km'),
+    profissional:val('d_prof'), preposto:val('d_prep'), grupoApoio:val('d_grupo'),
+    status:statusNovo, anexos:val('d_anexos'), obs:val('d_obs')
+  };
+  if(id){
+    const statusAntigo=antigo.status;
+    Object.assign(antigo,obj);
+    if(statusAntigo!==statusNovo) logDemanda(antigo,`Status alterado: ${statusAntigo} → ${statusNovo}`);
+    else logDemanda(antigo,'Demanda editada');
+    logAtiv('✏️',`Demanda ${demandaCod(antigo)} atualizada`);
+  } else {
+    obj.id=nextId('demanda'); obj.num=obj.id; obj.dataRecebimento=new Date().toISOString();
+    obj.historico=[]; obj.acionamentos=[];
+    logDemanda(obj,'Demanda registrada');
+    DB.demandas.push(obj);
+    logAtiv('📋',`Nova demanda ${demandaCod(obj)}: ${tipo}${obj.cidade?' — '+obj.cidade:''}`);
+  }
+  save();closeModal();renderDemandas();toast('Demanda salva.');
+}
+
+function delDemanda(id){
+  const d=DB.demandas.find(x=>x.id===id);
+  confirmar(`Excluir a demanda ${demandaCod(d)}? Essa ação não pode ser desfeita.`,()=>{
+    DB.demandas=DB.demandas.filter(x=>x.id!==id);logAtiv('🗑️',`Demanda ${demandaCod(d)} excluída`);save();renderDemandas();toast('Demanda excluída.','info');
+  });
+}
+
+function verDemanda(id){
+  const d=DB.demandas.find(x=>x.id===id);
+  const acion=(d.acionamentos||[]).map((a,i)=>`
+    <div class="dl-item"><span>${esc(a.nome)} <span class="tag tag-cinza">${esc(a.como)}</span>${a.cidade?' — '+esc(a.cidade):''}${a.dist!=null?` <span class="tag tag-azul">~${a.dist} km</span>`:''}</span>
+      <span class="tag ${a.status==='Confirmado'?'tag-verde':a.status==='Recusado'?'tag-vermelho':'tag-ouro'}">${esc(a.status)}</span></div>
+    <div style="display:flex;gap:5px;margin:0 0 9px;flex-wrap:wrap">
+      <span style="font-size:11px;color:var(--texto-suave);align-self:center">Acionado em ${dataHora(a.hora)}</span>
+      ${a.tel?`<a class="btn btn-sm btn-verde" href="${wppLink(a.tel)}" target="_blank" style="margin-left:auto">💬 WhatsApp</a>`:''}
+      <button class="btn btn-sm btn-verde" onclick="marcarAcionamento(${d.id},${i},'Confirmado')">✔ Confirmou</button>
+      <button class="btn btn-sm btn-vermelho" onclick="marcarAcionamento(${d.id},${i},'Recusado')">✖ Recusou</button>
+    </div>`).join('')||'<div class="empty">Nenhum profissional acionado ainda. Use “🧭 Encontrar profissionais”.</div>';
+  const hist=(d.historico||[]).map(h=>`
+    <div class="feed-item"><div class="feed-dot">•</div><div class="feed-txt"><div class="ft">${esc(h.acao)}</div><div class="fm">${dataHora(h.data)}${h.obs?' — '+esc(h.obs):''}</div></div></div>`).join('')||'<div class="empty">Sem movimentações.</div>';
+  const wppSolic=wppLink(d.telefone);
+  setModal(`📋 ${demandaCod(d)} — ${esc(d.tipoServico||'')}`,`
+    <div class="detail-grid">
+      <div class="detail-box"><h4>🏢 Solicitação</h4><div class="detail-list">
+        <div class="dl-item"><span>Empresa</span><strong>${esc(d.empresaSolic||'—')}</strong></div>
+        <div class="dl-item"><span>Solicitante</span><strong>${esc(d.solicitante||'—')}</strong></div>
+        <div class="dl-item"><span>Telefone</span><strong>${esc(d.telefone||'—')}</strong></div>
+        <div class="dl-item"><span>Recebida</span><strong>${dataHora(d.dataRecebimento)}</strong></div>
+        <div class="dl-item"><span>Prazo</span><strong>${d.prazo?new Date(d.prazo+'T00:00').toLocaleDateString('pt-BR'):'—'}</strong></div>
+      </div></div>
+      <div class="detail-box"><h4>📍 Local da ocorrência</h4><div class="detail-list">
+        <div class="dl-item"><span>Município</span><strong>${esc(d.cidade||'—')}/${esc(d.uf||'')}</strong></div>
+        <div class="dl-item"><span>Endereço</span><strong>${esc(d.endereco||'—')}</strong></div>
+        <div class="dl-item"><span>Rodovia</span><strong>${esc(d.rodovia||'—')}</strong></div>
+        <div class="dl-item"><span>Km</span><strong>${esc(d.km||'—')}</strong></div>
+      </div></div>
+      <div class="detail-box"><h4>🧭 Atendimento</h4><div class="detail-list">
+        <div class="dl-item"><span>Urgência</span><span class="tag ${URG_COR[d.urgencia]}">${esc(d.urgencia||'—')}</span></div>
+        <div class="dl-item"><span>Status</span><span class="tag ${STATUS_COR[d.status]}">${esc(d.status)}</span></div>
+        <div class="dl-item"><span>Profissional</span><strong>${esc(d.profissional||'—')}</strong></div>
+        <div class="dl-item"><span>Preposto</span><strong>${esc(d.preposto||'—')}</strong></div>
+        <div class="dl-item"><span>Grupo de apoio</span><strong>${esc(d.grupoApoio||'—')}</strong></div>
+      </div></div>
+    </div>
+    ${d.descricao?`<div class="detail-box" style="margin-top:14px"><h4>📝 Descrição</h4><div style="font-size:13px">${esc(d.descricao)}</div>${d.obs?`<div style="font-size:12.5px;color:var(--texto-suave);margin-top:7px">Obs.: ${esc(d.obs)}</div>`:''}${d.anexos?`<div style="font-size:12.5px;margin-top:7px">📎 ${esc(d.anexos)}</div>`:''}</div>`:''}
+    <div class="detail-box" style="margin-top:14px"><h4>📞 Profissionais acionados</h4><div class="detail-list">${acion}</div></div>
+    <div class="panel" style="margin-top:14px"><div class="panel-head"><h3 style="font-size:13px">🕒 Histórico de movimentações</h3></div><div class="panel-body" style="padding:6px 14px"><div class="feed">${hist}</div></div></div>`,
+    `${wppSolic?`<a class="btn btn-verde" href="${wppSolic}" target="_blank">💬 Solicitante</a>`:''}
+     <button class="btn btn-ouro" onclick="distribuir(${d.id})">🧭 Encontrar profissionais</button>
+     <button class="btn" onclick="mudarStatus(${d.id})">🔄 Status</button>
+     <button class="btn" onclick="novaVistoriaDeDemanda(${d.id})">🚚 Vistoria</button>
+     <button class="btn" onclick="gerarRelatorioDemanda(${d.id})">📄 Relatório</button>
+     <button class="btn" onclick="openDemanda(${d.id})">✏️ Editar</button>
+     <button class="btn" onclick="closeModal()">Fechar</button>`);
+}
+
+function mudarStatus(id){
+  const d=DB.demandas.find(x=>x.id===id);
+  setModal(`🔄 Status — ${demandaCod(d)}`,`
+    <div class="fld"><label>Novo status</label><select id="st_novo">${STATUS_DEMANDA.map(s=>`<option ${d.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+    <div class="fld" style="margin-top:10px"><label>Observação (opcional)</label><textarea id="st_obs" placeholder="Ex.: profissional a caminho, documentação recebida..."></textarea></div>`,
+    `<button class="btn" onclick="closeModal()">Cancelar</button>
+     <button class="btn btn-ouro" onclick="aplicarStatus(${id})">💾 Salvar</button>`);
+}
+function aplicarStatus(id){
+  const d=DB.demandas.find(x=>x.id===id);
+  const novo=val('st_novo'), obs=val('st_obs');
+  if(novo!==d.status){ logDemanda(d,`Status alterado: ${d.status} → ${novo}`,obs); d.status=novo; }
+  else if(obs){ logDemanda(d,'Anotação',obs); }
+  logAtiv('🔄',`${demandaCod(d)} → ${novo}`);
+  save();closeModal();renderDemandas();toast('Status atualizado.');
+}
+
+/* ---------- DISTRIBUIÇÃO INTELIGENTE ---------- */
+function compatEspecialidade(contato,tipo){
+  if(!tipo)return false;
+  const blob=((contato.servicos||'')+' '+(contato.especialidades||'')+' '+(contato.funcao||'')).toLowerCase();
+  const t=tipo.toLowerCase();
+  if(blob.includes(t))return true;
+  return t.split(/\s+/).some(w=>w.length>3 && blob.includes(w));
+}
+function candidatosDemanda(d){
+  const cidadeOrig=DB.cidades.find(c=>c.nome===d.cidade);
+  return DB.contatos.filter(c=>c.situacao==='ativo').map(c=>{
+    const mesmaCidade=c.cidade&&c.cidade===d.cidade;
+    let dist=null;
+    if(cidadeOrig){ const cc=DB.cidades.find(x=>x.nome===c.cidade); dist=distKm(cidadeOrig,cc); }
+    return {c,mesmaCidade,dist,compat:compatEspecialidade(c,d.tipoServico)};
+  }).sort((a,b)=>{
+    if(a.mesmaCidade!==b.mesmaCidade)return a.mesmaCidade?-1:1;
+    if(a.compat!==b.compat)return a.compat?-1:1;
+    const da=a.dist==null?1e9:a.dist, db=b.dist==null?1e9:b.dist;
+    return da-db;
+  });
+}
+function distribuir(id){
+  const d=DB.demandas.find(x=>x.id===id);
+  const cands=candidatosDemanda(d);
+  const temCoordOrig=DB.cidades.find(c=>c.nome===d.cidade&&c.lat!=null);
+  const linhas=cands.map(k=>{
+    const c=k.c;
+    const badges=[
+      k.mesmaCidade?'<span class="tag tag-verde">Mesma cidade</span>':'',
+      k.compat?'<span class="tag tag-ouro">Especialidade compatível</span>':'',
+      (k.dist!=null&&!k.mesmaCidade)?`<span class="tag tag-azul">~${k.dist} km (linha reta)</span>`:'',
+      (k.dist==null&&!k.mesmaCidade)?'<span class="tag tag-cinza">distância n/d</span>':''
+    ].filter(Boolean).join(' ');
+    return`<div class="detail-box" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div><strong>${esc(c.nome)}</strong> <span class="tag tag-cinza">${esc(c.funcao||'—')}</span>
+          <div style="font-size:12px;color:var(--texto-suave);margin-top:3px">📍 ${esc(c.cidade||'—')}/${esc(c.uf||'')} · 📞 ${esc(c.tel1||c.wpp||'—')}${c.disp?' · '+esc(c.disp):''}</div>
+          ${c.especialidades?`<div style="font-size:12px;margin-top:2px">🏷️ ${esc(c.especialidades)}</div>`:''}
+          <div class="chips" style="margin-top:6px">${badges}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:9px;flex-wrap:wrap">
+        ${(c.wpp||c.tel1)?`<a class="btn btn-sm btn-verde" href="${wppDemandaLink(d,c)}" target="_blank">💬 Enviar demanda</a>`:''}
+        <button class="btn btn-sm btn-ouro" onclick="acionar(${d.id},${c.id},'Profissional')">✔ Acionar como profissional</button>
+        <button class="btn btn-sm" onclick="acionar(${d.id},${c.id},'Preposto')">Acionar como preposto</button>
+      </div>
+    </div>`;
+  }).join('');
+  const aviso = d.cidade
+    ? (temCoordOrig?'':`<div class="demo-banner" style="margin-bottom:12px">ⓘ O município <strong>${esc(d.cidade)}</strong> não tem coordenadas cadastradas, então não dá para ordenar por distância. Cadastre latitude/longitude na cidade para ativar a proximidade.</div>`)
+    : `<div class="demo-banner" style="margin-bottom:12px">ⓘ Esta demanda não tem município definido. Informe o município para localizar profissionais próximos.</div>`;
+  setModal(`🧭 Profissionais para ${demandaCod(d)}`,`
+    ${aviso}
+    <div style="font-size:12.5px;color:var(--texto-suave);margin-bottom:10px">Ordenados por: mesma cidade → especialidade compatível → menor distância em linha reta. A disponibilidade exibida é o cadastro do profissional — <strong>só confirme após falar com ele</strong>.</div>
+    ${linhas||'<div class="t-empty">Nenhum profissional ativo cadastrado. Cadastre contatos primeiro.</div>'}`,
+    `<button class="btn" onclick="verDemanda(${d.id})">← Voltar à demanda</button>
+     <button class="btn" onclick="closeModal()">Fechar</button>`);
+}
+function wppDemandaLink(d,c){
+  const linhas=[
+    '*NOVA DEMANDA / OCORRÊNCIA*',
+    'Código: '+demandaCod(d),
+    'Tipo: '+(d.tipoServico||'—'),
+    'Urgência: '+(d.urgencia||'—'),
+    'Local: '+((d.cidade||'—')+'/'+(d.uf||''))+(d.endereco?' - '+d.endereco:''),
+    (d.rodovia||d.km)?('Rodovia: '+(d.rodovia||'')+(d.km?' '+d.km:'')):'',
+    d.prazo?('Prazo: '+new Date(d.prazo+'T00:00').toLocaleDateString('pt-BR')):'',
+    d.descricao?('Descrição: '+d.descricao):'',
+    '',
+    'Você teria disponibilidade para este atendimento? Favor confirmar.'
+  ].filter(l=>l!=='' || true).join('\n');
+  const num=soDigitos(c.wpp||c.tel1); let dd=num; if(dd.length<=11&&dd[0]!=='5')dd='55'+dd;
+  return 'https://wa.me/'+dd+'?text='+encodeURIComponent(linhas);
+}
+function acionar(demandaId,contatoId,como){
+  const d=DB.demandas.find(x=>x.id===demandaId);
+  const c=DB.contatos.find(x=>x.id===contatoId);
+  const cidadeOrig=DB.cidades.find(x=>x.nome===d.cidade);
+  const cc=DB.cidades.find(x=>x.nome===c.cidade);
+  (d.acionamentos=d.acionamentos||[]).push({
+    contatoId:c.id, nome:c.nome, tel:c.wpp||c.tel1, funcao:c.funcao, cidade:c.cidade,
+    como, status:'Acionado', hora:new Date().toISOString(), dist:distKm(cidadeOrig,cc)
+  });
+  if(como==='Preposto') d.preposto=c.nome; else d.profissional=c.nome;
+  if(['Nova demanda','Aguardando análise','Aguardando profissional'].includes(d.status)) d.status='Profissional acionado';
+  logDemanda(d,`${c.nome} acionado como ${como.toLowerCase()}`);
+  logAtiv('📤',`${demandaCod(d)}: ${c.nome} acionado (${como})`);
+  save();updateNavBadges();verDemanda(demandaId);toast('Profissional acionado. Confirme após o contato.','info');
+}
+function marcarAcionamento(demandaId,idx,novo){
+  const d=DB.demandas.find(x=>x.id===demandaId);
+  const a=(d.acionamentos||[])[idx]; if(!a)return;
+  a.status=novo; a.horaResposta=new Date().toISOString();
+  if(novo==='Confirmado'){ d.status='Atendimento confirmado'; logDemanda(d,`${a.nome} CONFIRMOU o atendimento`); }
+  else { logDemanda(d,`${a.nome} recusou o atendimento`);
+    if(a.como==='Preposto'&&d.preposto===a.nome)d.preposto=''; if(a.como==='Profissional'&&d.profissional===a.nome)d.profissional='';
+    if(demAberta(d))d.status='Aguardando profissional';
+  }
+  logAtiv(novo==='Confirmado'?'✅':'↩️',`${demandaCod(d)}: ${a.nome} ${novo.toLowerCase()}`);
+  save();updateNavBadges();verDemanda(demandaId);
+}
+
+/* =======================================================================
+   ETAPA 3 — VISTORIAS, PROCEDIMENTOS, CHECKLIST, RELATÓRIOS, MAPA
+   ======================================================================= */
+const TIPOS_ACIDENTE=['Tombamento','Colisão','Capotamento','Incêndio','Vazamento','Pane / parada','Outro'];
+const SITUACAO_VEICULO=['Na pista','Parcialmente na pista','Fora da pista','Aguardando remoção','Removido'];
+const SIM_NAO=['Não avaliado','Sim','Não'];
+const CHECKLIST_TOMBAMENTO=[
+ {t:'Etapa 1 – Recebimento', itens:['Identificar localização','Identificar rodovia e quilômetro','Identificar o veículo','Identificar o tipo de carga','Confirmar existência de vítimas','Verificar vazamentos e incêndios']},
+ {t:'Etapa 2 – Segurança', itens:['Área isolada','Órgãos de emergência atendendo','Riscos de explosão/contaminação identificados','Acesso liberado para o vistoriador','Necessidade de equipe especializada avaliada']},
+ {t:'Etapa 3 – Avaliação ambiental', itens:['Contaminação do solo verificada','Proximidade de recursos hídricos verificada','Danos à vegetação verificados','Materiais derramados identificados','Danos ambientais registrados','Medidas de contenção documentadas']},
+ {t:'Etapa 4 – Registro', itens:['Fotografias gerais','Fotografias detalhadas','Fotografias da identificação do veículo','Fotografias da carga','Localização registrada','Data e horário registrados','Responsáveis identificados','Documentos recebidos']},
+ {t:'Etapa 5 – Encerramento', itens:['Providências registradas','Equipe responsável registrada','Remoção da carga registrada','Destinação dos resíduos registrada','Relatório final anexado','Status da ocorrência atualizado']}
+];
+const PROCEDIMENTOS=[
+ {t:'Cargas agrícolas',ic:'🌾',ex:['Soja','Milho','Algodão','Fertilizantes','Outros produtos agrícolas'],ver:['Derramamento de carga','Contaminação do solo','Proximidade de rios e córregos','Danos à vegetação','Possibilidade de recolhimento','Necessidade de destinação adequada']},
+ {t:'Combustíveis e derivados',ic:'⛽',ex:['Diesel','Gasolina','Etanol','Outros combustíveis'],ver:['Vazamentos','Risco de incêndio','Risco de explosão','Contaminação do solo','Possibilidade de atingir cursos d’água','Necessidade de contenção especializada']},
+ {t:'Produtos químicos',ic:'⚗️',ex:['Ácidos','Solventes','Defensivos agrícolas','Produtos industriais'],ver:['Identificação do produto','Número ONU','Classe de risco','Documentação de transporte','Existência de vazamentos','Riscos à população','Riscos ambientais','Necessidade de equipe especializada']},
+ {t:'Cargas gerais',ic:'📦',ex:['Eletrodomésticos','Móveis','Materiais de construção','Mercadorias diversas'],ver:['Danos à carga','Dispersão de materiais','Embalagens danificadas','Presença de produtos perigosos','Necessidade de recolhimento']},
+ {t:'Resíduos',ic:'♻️',ex:[],ver:['Origem','Classificação','Tipo de resíduo','Possibilidade de contaminação','Condições de acondicionamento','Necessidade de transporte especializado','Destinação ambientalmente adequada']}
+];
+const AVISO_SEGURANCA='O vistoriador <strong>não deve</strong> manipular produtos perigosos, executar contenção ou acessar áreas contaminadas sem capacitação, autorização e equipamentos adequados. Em caso de risco, acione os órgãos competentes (PRF, Corpo de Bombeiros, órgão ambiental).';
+
+function vistCod(v){ return 'VT-'+String(v.num||v.id||0).padStart(4,'0'); }
+function toLocalInput(iso){ const d=new Date(iso),p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes()); }
+function chkProgresso(v){ const tot=CHECKLIST_TOMBAMENTO.reduce((n,e)=>n+e.itens.length,0); const feito=Object.values(v.checklist||{}).filter(Boolean).length; return{feito,tot,pct:tot?Math.round(feito/tot*100):0}; }
+
+/* ---------- compressão de fotos ---------- */
+function processarFoto(file){
+  return new Promise(res=>{
+    const r=new FileReader();
+    r.onload=()=>{ const img=new Image();
+      img.onload=()=>{ const max=1024; let w=img.width,h=img.height;
+        if(w>max||h>max){const s=Math.min(max/w,max/h);w=Math.round(w*s);h=Math.round(h*s);}
+        const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
+        res(cv.toDataURL('image/jpeg',0.7)); };
+      img.onerror=()=>res(null); img.src=r.result; };
+    r.onerror=()=>res(null); r.readAsDataURL(file);
+  });
+}
+let vistFotosTmp=[];
+function renderFotosTmp(){
+  const box=document.getElementById('v_fotos'); if(!box)return;
+  box.innerHTML=vistFotosTmp.map((f,i)=>`<div class="foto-item"><img src="${f}"><button class="rm" onclick="rmFotoTmp(${i})">×</button></div>`).join('')
+    +`<div class="foto-add" onclick="document.getElementById('v_fotoInput').click()"><span style="font-size:20px">＋</span>Foto</div>`;
+}
+function rmFotoTmp(i){ vistFotosTmp.splice(i,1); renderFotosTmp(); }
+async function addFotosVist(ev){
+  const files=[...ev.target.files]; let ok=0;
+  for(const f of files){ const d=await processarFoto(f); if(d){vistFotosTmp.push(d);ok++;} }
+  ev.target.value=''; renderFotosTmp(); if(ok)toast(ok+' foto(s) adicionada(s).');
+}
+
+/* ---------- VISTORIAS ---------- */
+function preencherFiltroVist(){
+  const s=document.getElementById('fVistCidade'); const a=s.value;
+  s.innerHTML='<option value="">Todas as cidades</option>'+DB.cidades.map(c=>`<option ${c.nome===a?'selected':''}>${esc(c.nome)}</option>`).join('');
+}
+function renderVistorias(){
+  preencherFiltroVist();
+  const q=(document.getElementById('fVistBusca').value||'').toLowerCase();
+  const fc=document.getElementById('fVistCidade').value;
+  let lista=(DB.vistorias||[]).filter(v=>{
+    if(fc&&v.cidade!==fc)return false;
+    if(q){const b=[vistCod(v),v.placaCavalo,v.placaCarreta,v.motorista,v.transportadora,v.tipoCarga,v.cidade].join(' ').toLowerCase();if(!b.includes(q))return false;}
+    return true;
+  }).sort((a,b)=>(b.num||0)-(a.num||0));
+  const tb=document.getElementById('tbVistorias');
+  if(!lista.length){tb.innerHTML=`<tr><td colspan="9" class="t-empty">Nenhuma vistoria registrada. Clique em “＋ Nova Vistoria”.</td></tr>`;return;}
+  tb.innerHTML=lista.map(v=>{const p=chkProgresso(v);return`<tr>
+    <td><strong>${vistCod(v)}</strong></td>
+    <td style="font-size:12px">${v.dataOcorrencia?new Date(v.dataOcorrencia).toLocaleDateString('pt-BR'):'—'}</td>
+    <td>${esc(v.placaCavalo||'—')}${v.placaCarreta?'<br><span style="font-size:11px;color:var(--texto-suave)">'+esc(v.placaCarreta)+'</span>':''}</td>
+    <td>${esc(v.transportadora||'—')}</td>
+    <td>${esc(v.tipoCarga||'—')}</td>
+    <td>${esc(v.cidade||'—')}${v.uf?'/'+esc(v.uf):''}</td>
+    <td><span class="tag tag-cinza">${esc(v.tipoAcidente||'—')}</span></td>
+    <td style="min-width:92px"><div class="progress"><div class="bar" style="width:${p.pct}%"></div></div><div style="font-size:10px;color:var(--texto-suave);margin-top:2px">${pad2(p.feito)}/${pad2(p.tot)}</div></td>
+    <td><div class="row-actions">
+      <button class="ic-btn view" onclick="verVistoria(${v.id})" title="Ver">👁️</button>
+      <button class="ic-btn edit" onclick="openVistoria(${v.id})" title="Editar">✏️</button>
+      <button class="ic-btn" onclick="abrirChecklist(${v.id})" title="Checklist">✅</button>
+      <button class="ic-btn del" onclick="delVistoria(${v.id})" title="Excluir">🗑️</button>
+    </div></td></tr>`;}).join('');
+}
+function openVistoria(id,demandaId){
+  const v=id?DB.vistorias.find(x=>x.id===id):{};
+  vistFotosTmp=(v.fotos||[]).slice();
+  let pre={};
+  if(demandaId){const d=DB.demandas.find(x=>x.id===demandaId);if(d)pre={cidade:d.cidade,uf:d.uf,rodovia:d.rodovia,km:d.km,localizacao:d.endereco,demandaId:d.id};}
+  const g=k=>esc((v[k]!=null?v[k]:pre[k])||'');
+  const cidadesOpt='<option value="">—</option>'+DB.cidades.map(ci=>`<option ${(v.cidade||pre.cidade)===ci.nome?'selected':''} data-uf="${ci.uf}">${esc(ci.nome)}</option>`).join('');
+  const selOpt=(arr,cur)=>arr.map(o=>`<option ${cur===o?'selected':''}>${o}</option>`).join('');
+  setModal(id?('Editar Vistoria '+vistCod(v)):'Nova Vistoria de Caminhão / Carga',`
+    <div class="form-grid">
+      <div class="fld"><label>Placa do cavalo</label><input id="v_pc" value="${g('placaCavalo')}" style="text-transform:uppercase"></div>
+      <div class="fld"><label>Placa da carreta</label><input id="v_pr" value="${g('placaCarreta')}" style="text-transform:uppercase"></div>
+      <div class="fld"><label>Modelo do veículo</label><input id="v_mod" value="${g('modelo')}"></div>
+      <div class="fld"><label>Transportadora</label><input id="v_transp" value="${g('transportadora')}"></div>
+      <div class="fld"><label>Nome do motorista</label><input id="v_mot" value="${g('motorista')}"></div>
+      <div class="fld"><label>Telefone do motorista</label><input id="v_telmot" value="${g('telMotorista')}"></div>
+      <div class="fld"><label>Empresa proprietária da carga</label><input id="v_empcarga" value="${g('empresaCarga')}"></div>
+      <div class="fld"><label>Seguradora</label><input id="v_seg" value="${g('seguradora')}"></div>
+      <div class="fld"><label>Tipo de carga</label><input id="v_tcarga" value="${g('tipoCarga')}" placeholder="Soja, diesel, químico..."></div>
+      <div class="fld"><label>Quantidade transportada</label><input id="v_qtd" value="${g('qtdCarga')}"></div>
+      <div class="fld"><label>Origem</label><input id="v_orig" value="${g('origem')}"></div>
+      <div class="fld"><label>Destino</label><input id="v_dest" value="${g('destino')}"></div>
+      <div class="fld"><label>Município</label><select id="v_cidade" onchange="autoUF(this,'v_uf')">${cidadesOpt}</select></div>
+      <div class="fld"><label>UF</label><input id="v_uf" value="${g('uf')}" maxlength="2" style="text-transform:uppercase"></div>
+      <div class="fld full"><label>Localização do veículo</label><input id="v_loc" value="${g('localizacao')}"></div>
+      <div class="fld"><label>Rodovia</label><input id="v_rod" value="${g('rodovia')}"></div>
+      <div class="fld"><label>Quilômetro</label><input id="v_km" value="${g('km')}"></div>
+      <div class="fld"><label>Data e horário da ocorrência</label><input type="datetime-local" id="v_data" value="${v.dataOcorrencia?toLocalInput(v.dataOcorrencia):''}"></div>
+      <div class="fld"><label>Tipo de acidente</label><select id="v_tipoac"><option value="">—</option>${selOpt(TIPOS_ACIDENTE,v.tipoAcidente)}</select></div>
+      <div class="fld"><label>Situação do veículo</label><select id="v_sit"><option value="">—</option>${selOpt(SITUACAO_VEICULO,v.situacaoVeiculo)}</select></div>
+      <div class="fld"><label>Danos ambientais</label><select id="v_dano">${selOpt(SIM_NAO,v.danosAmbientais||'Não avaliado')}</select></div>
+      <div class="fld"><label>Vítimas</label><select id="v_vit">${selOpt(SIM_NAO,v.vitimas||'Não avaliado')}</select></div>
+      <div class="fld full"><label>Equipes acionadas</label><input id="v_eq" value="${g('equipes')}" placeholder="PRF, bombeiros, ambiental, guincho..."></div>
+      <div class="fld full"><label>Relatório de vistoria / observações</label><textarea id="v_rel" style="min-height:80px">${g('relatorio')}</textarea></div>
+      <div class="fld full"><label>Fotografias</label>
+        <div class="foto-grid" id="v_fotos"></div>
+        <input type="file" id="v_fotoInput" accept="image/*" multiple style="display:none" onchange="addFotosVist(event)">
+      </div>
+    </div>
+    <input type="hidden" id="v_demandaId" value="${v.demandaId!=null?v.demandaId:(pre.demandaId!=null?pre.demandaId:'')}">`,
+    `<button class="btn" onclick="closeModal()">Cancelar</button>
+     <button class="btn btn-ouro" onclick="saveVistoria(${id||0})">💾 Salvar</button>`);
+  renderFotosTmp();
+}
+function saveVistoria(id){
+  const obj={
+    placaCavalo:val('v_pc').toUpperCase(),placaCarreta:val('v_pr').toUpperCase(),modelo:val('v_mod'),
+    transportadora:val('v_transp'),motorista:val('v_mot'),telMotorista:val('v_telmot'),
+    empresaCarga:val('v_empcarga'),seguradora:val('v_seg'),tipoCarga:val('v_tcarga'),qtdCarga:val('v_qtd'),
+    origem:val('v_orig'),destino:val('v_dest'),cidade:val('v_cidade'),uf:val('v_uf').toUpperCase(),
+    localizacao:val('v_loc'),rodovia:val('v_rod'),km:val('v_km'),
+    dataOcorrencia:val('v_data')?new Date(val('v_data')).toISOString():'',
+    tipoAcidente:val('v_tipoac'),situacaoVeiculo:val('v_sit'),danosAmbientais:val('v_dano'),vitimas:val('v_vit'),
+    equipes:val('v_eq'),relatorio:val('v_rel'),fotos:vistFotosTmp.slice(),
+    demandaId:val('v_demandaId')?parseInt(val('v_demandaId')):null
+  };
+  if(id){const old=DB.vistorias.find(x=>x.id===id);obj.checklist=old.checklist||{};obj.checklistNota=old.checklistNota||'';obj.num=old.num;Object.assign(old,obj);logAtiv('✏️',`Vistoria ${vistCod(old)} atualizada`);}
+  else{obj.id=nextId('vistoria');obj.num=obj.id;obj.checklist={};obj.checklistNota='';obj.criadoEm=new Date().toISOString();DB.vistorias.push(obj);
+    logAtiv('🚚',`Nova vistoria ${vistCod(obj)}${obj.placaCavalo?' — '+obj.placaCavalo:''}`);
+    if(obj.demandaId){const d=DB.demandas.find(x=>x.id===obj.demandaId);if(d){logDemanda(d,`Vistoria ${vistCod(obj)} criada`);}}
+  }
+  if(save()){closeModal();renderVistorias();toast('Vistoria salva.');}
+}
+function delVistoria(id){
+  const v=DB.vistorias.find(x=>x.id===id);
+  confirmar(`Excluir a vistoria ${vistCod(v)}? As fotos também serão apagadas.`,()=>{
+    DB.vistorias=DB.vistorias.filter(x=>x.id!==id);logAtiv('🗑️',`Vistoria ${vistCod(v)} excluída`);save();renderVistorias();toast('Vistoria excluída.','info');
+  });
+}
+function novaVistoriaDeDemanda(id){ closeModal(); setTimeout(()=>openVistoria(null,id),150); }
+function verVistoria(id){
+  const v=DB.vistorias.find(x=>x.id===id);const p=chkProgresso(v);
+  const wppMot=wppLink(v.telMotorista);
+  const fotos=(v.fotos||[]).length?`<div class="foto-grid">${v.fotos.map(f=>`<div class="foto-item"><img src="${f}"></div>`).join('')}</div>`:'<div class="empty">Sem fotos.</div>';
+  setModal(`🚚 ${vistCod(v)}`,`
+    <div class="detail-grid">
+      <div class="detail-box"><h4>🚛 Veículo</h4><div class="detail-list">
+        <div class="dl-item"><span>Cavalo</span><strong>${esc(v.placaCavalo||'—')}</strong></div>
+        <div class="dl-item"><span>Carreta</span><strong>${esc(v.placaCarreta||'—')}</strong></div>
+        <div class="dl-item"><span>Modelo</span><strong>${esc(v.modelo||'—')}</strong></div>
+        <div class="dl-item"><span>Transportadora</span><strong>${esc(v.transportadora||'—')}</strong></div>
+        <div class="dl-item"><span>Motorista</span><strong>${esc(v.motorista||'—')}</strong></div>
+      </div></div>
+      <div class="detail-box"><h4>📦 Carga</h4><div class="detail-list">
+        <div class="dl-item"><span>Tipo</span><strong>${esc(v.tipoCarga||'—')}</strong></div>
+        <div class="dl-item"><span>Quantidade</span><strong>${esc(v.qtdCarga||'—')}</strong></div>
+        <div class="dl-item"><span>Proprietária</span><strong>${esc(v.empresaCarga||'—')}</strong></div>
+        <div class="dl-item"><span>Seguradora</span><strong>${esc(v.seguradora||'—')}</strong></div>
+        <div class="dl-item"><span>Origem→Destino</span><strong>${esc(v.origem||'—')} → ${esc(v.destino||'—')}</strong></div>
+      </div></div>
+      <div class="detail-box"><h4>⚠️ Ocorrência</h4><div class="detail-list">
+        <div class="dl-item"><span>Data</span><strong>${v.dataOcorrencia?dataHora(v.dataOcorrencia):'—'}</strong></div>
+        <div class="dl-item"><span>Local</span><strong>${esc(v.cidade||'—')}/${esc(v.uf||'')}</strong></div>
+        <div class="dl-item"><span>Rodovia/Km</span><strong>${esc(v.rodovia||'—')} ${esc(v.km||'')}</strong></div>
+        <div class="dl-item"><span>Tipo</span><strong>${esc(v.tipoAcidente||'—')}</strong></div>
+        <div class="dl-item"><span>Situação</span><strong>${esc(v.situacaoVeiculo||'—')}</strong></div>
+        <div class="dl-item"><span>Danos amb.</span><strong>${esc(v.danosAmbientais||'—')}</strong></div>
+        <div class="dl-item"><span>Vítimas</span><strong>${esc(v.vitimas||'—')}</strong></div>
+      </div></div>
+    </div>
+    ${v.relatorio?`<div class="detail-box" style="margin-top:14px"><h4>📝 Relatório</h4><div style="font-size:13px;white-space:pre-wrap">${esc(v.relatorio)}</div></div>`:''}
+    <div class="detail-box" style="margin-top:14px"><h4>✅ Checklist de tombamento</h4>
+      <div class="progress"><div class="bar" style="width:${p.pct}%"></div></div>
+      <div style="font-size:12px;color:var(--texto-suave);margin-top:4px">${p.feito}/${p.tot} itens preenchidos</div></div>
+    <div class="detail-box" style="margin-top:14px"><h4>📷 Fotografias (${(v.fotos||[]).length})</h4>${fotos}</div>`,
+    `${wppMot?`<a class="btn btn-verde" href="${wppMot}" target="_blank">💬 Motorista</a>`:''}
+     <button class="btn btn-ouro" onclick="abrirChecklist(${v.id})">✅ Checklist</button>
+     <button class="btn" onclick="gerarRelatorioVistoria(${v.id})">📄 Relatório</button>
+     <button class="btn" onclick="openVistoria(${v.id})">✏️ Editar</button>
+     <button class="btn" onclick="closeModal()">Fechar</button>`);
+}
+
+/* ---------- CHECKLIST ---------- */
+function renderChecklistPage(){
+  const box=document.getElementById('chkLista');
+  const vs=DB.vistorias||[];
+  if(!vs.length){box.innerHTML='<div class="t-empty">Nenhuma vistoria ainda.</div><div style="text-align:center;margin-top:10px"><button class="btn btn-ouro" onclick="openVistoria()">＋ Nova Vistoria</button></div>';return;}
+  box.innerHTML=vs.slice().sort((a,b)=>(b.num||0)-(a.num||0)).map(v=>{const p=chkProgresso(v);return`<div class="detail-box" style="margin-bottom:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div style="flex:1;min-width:180px"><strong>${vistCod(v)}</strong> — ${esc(v.placaCavalo||'sem placa')} · ${esc(v.cidade||'—')}/${esc(v.uf||'')}
+      <div class="progress" style="margin-top:7px"><div class="bar" style="width:${p.pct}%"></div></div>
+      <div style="font-size:11px;color:var(--texto-suave);margin-top:3px">${pad2(p.feito)}/${pad2(p.tot)} itens</div></div>
+    <button class="btn btn-ouro btn-sm" onclick="abrirChecklist(${v.id})">Abrir checklist</button>
+  </div>`;}).join('');
+}
+function abrirChecklist(id){
+  const v=DB.vistorias.find(x=>x.id===id);
+  const body=CHECKLIST_TOMBAMENTO.map((et,ei)=>{
+    const feitosEt=et.itens.filter((_,ii)=>v.checklist[ei+'-'+ii]).length;
+    return`<div class="chk-etapa"><h4>${esc(et.t)} <span style="font-size:11px;color:var(--texto-suave)">${pad2(feitosEt)}/${pad2(et.itens.length)}</span></h4>
+      <div class="chk-list">${et.itens.map((it,ii)=>{const on=!!v.checklist[ei+'-'+ii];return`<label class="chk-row ${on?'done':''}"><input type="checkbox" ${on?'checked':''} onchange="toggleChk(${id},'${ei}-${ii}',this)"> ${esc(it)}</label>`;}).join('')}</div></div>`;
+  }).join('');
+  const p=chkProgresso(v);
+  setModal(`✅ Checklist — ${vistCod(v)}`,`
+    <div style="margin-bottom:12px"><div class="progress"><div class="bar" id="chkBar" style="width:${p.pct}%"></div></div>
+    <div style="font-size:12px;color:var(--texto-suave);margin-top:4px" id="chkTxt">${p.feito} de ${p.tot} itens (${p.pct}%)</div></div>
+    <div class="warn-box"><span class="wi">⚠️</span><span>${AVISO_SEGURANCA}</span></div>
+    ${body}
+    <div class="fld" style="margin-top:8px"><label>Anotações do checklist</label><textarea id="chkNota" onchange="saveChkNota(${id},this.value)">${esc(v.checklistNota||'')}</textarea></div>`,
+    `<button class="btn" onclick="gerarRelatorioVistoria(${id},'Checklist de Ocorrência')">📄 Imprimir checklist</button>
+     <button class="btn btn-ouro" onclick="closeModal();renderChecklistPage();renderVistorias()">✔ Concluir</button>`);
+}
+function toggleChk(id,key,cb){
+  const v=DB.vistorias.find(x=>x.id===id); v.checklist[key]=cb.checked;
+  cb.closest('.chk-row').classList.toggle('done',cb.checked); save();
+  const p=chkProgresso(v),bar=document.getElementById('chkBar');
+  if(bar){bar.style.width=p.pct+'%';document.getElementById('chkTxt').textContent=`${p.feito} de ${p.tot} itens (${p.pct}%)`;}
+}
+function saveChkNota(id,txt){ const v=DB.vistorias.find(x=>x.id===id); v.checklistNota=txt; save(); }
+
+/* ---------- PROCEDIMENTOS ---------- */
+function renderProcedimentos(){
+  document.getElementById('procBody').innerHTML=`
+    <div class="warn-box"><span class="wi">⚠️</span><span><strong>Segurança em primeiro lugar.</strong> Este módulo é apenas um guia de observação. ${AVISO_SEGURANCA}</span></div>
+    ${PROCEDIMENTOS.map((p,i)=>`<div class="proc-card ${i===0?'open':''}">
+      <div class="proc-head" onclick="this.parentNode.classList.toggle('open')"><span class="pi">${p.ic}</span><h4>${esc(p.t)}</h4><span class="ar">▶</span></div>
+      <div class="proc-body">
+        ${p.ex.length?`<h5>Exemplos</h5><ul>${p.ex.map(e=>`<li class="tag tag-cinza">${esc(e)}</li>`).join('')}</ul>`:''}
+        <h5>O que verificar</h5><div class="proc-body ver" style="display:block;padding:0"><ul>${p.ver.map(x=>`<li>✔ ${esc(x)}</li>`).join('')}</ul></div>
+      </div></div>`).join('')}`;
+}
+
+/* ---------- RELATÓRIOS / PDF ---------- */
+function repHeader(titulo,sub){
+  const e=DB.emitente||{};
+  return `<div class="rep-head"><div class="rep-emblema">🚚</div>
+    <div class="rep-h-txt"><div class="rep-rede">REDE NACIONAL DE VISTORIADORES E REGULADORAS DO BRASIL</div>
+    <div class="rep-emit">${esc(e.nome||'Vistoriador / Regulador')}${e.registro?' — '+esc(e.registro):''}</div></div>
+    <div class="rep-doc">${esc(titulo)}</div></div>
+    <div class="rep-sub">${esc(sub||'')}</div>`;
+}
+function repFooter(){
+  const e=DB.emitente||{};
+  const partes=[e.nome,e.telefone,e.email,e.cidade].filter(Boolean).join(' • ');
+  return `<div class="rep-footer">${esc(partes||'Rede Nacional de Vistoriadores e Reguladoras do Brasil')}</div>`;
+}
+function repSecao(titulo,rows){
+  return `<div class="rep-sec"><h3>${esc(titulo)}</h3><table class="rep-tbl">${rows.map(([k,v])=>`<tr><td class="k">${esc(k)}</td><td>${esc(v||'—')}</td></tr>`).join('')}</table></div>`;
+}
+function imprimirRelatorio(html){
+  const area=document.getElementById('printArea'); area.innerHTML=html;
+  document.body.classList.add('printing');
+  window.print();
+  setTimeout(()=>{document.body.classList.remove('printing');area.innerHTML='';},600);
+}
+function escolherRelatorio(tipos,cb){
+  setModal('📄 Escolha o documento',`<div style="display:flex;flex-direction:column;gap:8px">${tipos.map(t=>`<button class="btn" style="justify-content:flex-start" data-t="${esc(t)}" onclick="__relCb(this)">📄 ${esc(t)}</button>`).join('')}</div>`,
+    `<button class="btn" onclick="closeModal()">Cancelar</button>`);
+  window.__relCb=btn=>{const t=btn.getAttribute('data-t');closeModal();setTimeout(()=>cb(t),150);};
+}
+function gerarRelatorioDemanda(id){
+  escolherRelatorio(['Registro de Atendimento','Ordem de Serviço','Solicitação de Preposto','Relatório de Conclusão','Histórico de Atendimento'],t=>imprimirRelatorio(montarRelDemanda(id,t)));
+}
+function gerarRelatorioVistoria(id,forcar){
+  if(forcar){imprimirRelatorio(montarRelVistoria(id,forcar));return;}
+  escolherRelatorio(['Relatório de Vistoria','Relatório de Tombamento','Relatório Ambiental','Relatório Fotográfico','Checklist de Ocorrência'],t=>imprimirRelatorio(montarRelVistoria(id,t)));
+}
+function montarRelDemanda(id,tipo){
+  const d=DB.demandas.find(x=>x.id===id);
+  let sec='';
+  if(tipo==='Solicitação de Preposto'){
+    sec=repSecao('Solicitação de preposto',[['Demanda',demandaCod(d)],['Serviço',d.tipoServico],['Local',(d.cidade||'')+'/'+(d.uf||'')],['Endereço',d.endereco],['Preposto designado',d.preposto||'A designar'],['Prazo',d.prazo?new Date(d.prazo+'T00:00').toLocaleDateString('pt-BR'):'—']])
+      +`<div class="rep-sec"><h3>Descrição do serviço</h3><div style="font-size:12px">${esc(d.descricao||'—')}</div></div>`;
+  } else if(tipo==='Histórico de Atendimento'){
+    sec=repSecao('Identificação',[['Código',demandaCod(d)],['Tipo',d.tipoServico],['Local',(d.cidade||'')+'/'+(d.uf||'')],['Status atual',d.status]])
+      +`<div class="rep-sec"><h3>Histórico de movimentações</h3><table class="rep-tbl"><tr><td class="k">Data</td><td class="k">Movimentação</td></tr>${(d.historico||[]).map(h=>`<tr><td>${dataHora(h.data)}</td><td>${esc(h.acao)}${h.obs?' — '+esc(h.obs):''}</td></tr>`).join('')}</table></div>`;
+  } else {
+    sec=repSecao('Identificação da ocorrência',[['Código',demandaCod(d)],['Tipo de serviço',d.tipoServico],['Urgência',d.urgencia],['Recebida em',dataHora(d.dataRecebimento)],['Prazo',d.prazo?new Date(d.prazo+'T00:00').toLocaleDateString('pt-BR'):'—'],['Status',d.status]])
+      +repSecao('Solicitante',[['Empresa',d.empresaSolic],['Contato',d.solicitante],['Telefone',d.telefone]])
+      +repSecao('Localização',[['Município',(d.cidade||'')+'/'+(d.uf||'')],['Endereço',d.endereco],['Rodovia',d.rodovia],['Km',d.km]])
+      +repSecao('Atendimento',[['Profissional responsável',d.profissional],['Preposto',d.preposto],['Grupo de apoio',d.grupoApoio]]);
+    if(d.descricao) sec+=`<div class="rep-sec"><h3>Descrição / fatos</h3><div style="font-size:12px">${esc(d.descricao)}</div>${d.obs?`<div style="font-size:12px;margin-top:6px"><strong>Observações:</strong> ${esc(d.obs)}</div>`:''}</div>`;
+  }
+  return repHeader(tipo,demandaCod(d))+sec+repFooter();
+}
+function montarRelVistoria(id,tipo){
+  const v=DB.vistorias.find(x=>x.id===id);
+  const fotosHtml=(v.fotos&&v.fotos.length)?`<div class="rep-sec"><h3>Registro fotográfico (${v.fotos.length})</h3><div class="rep-fotos">${v.fotos.map(f=>`<img src="${f}">`).join('')}</div></div>`:'';
+  let sec='';
+  if(tipo==='Relatório Ambiental'){
+    sec=repSecao('Avaliação ambiental',[['Vistoria',vistCod(v)],['Local',(v.cidade||'')+'/'+(v.uf||'')],['Tipo de carga',v.tipoCarga],['Danos ambientais',v.danosAmbientais],['Situação do veículo',v.situacaoVeiculo],['Equipes acionadas',v.equipes]])
+      +(v.relatorio?`<div class="rep-sec"><h3>Observações ambientais</h3><div style="font-size:12px;white-space:pre-wrap">${esc(v.relatorio)}</div></div>`:'')+fotosHtml;
+  } else if(tipo==='Relatório Fotográfico'){
+    sec=repSecao('Identificação',[['Vistoria',vistCod(v)],['Placa',v.placaCavalo],['Local',(v.cidade||'')+'/'+(v.uf||'')],['Data',v.dataOcorrencia?dataHora(v.dataOcorrencia):'—']])
+      +(fotosHtml||'<div class="rep-sec"><h3>Registro fotográfico</h3><div style="font-size:12px">Nenhuma foto anexada.</div></div>');
+  } else if(tipo==='Checklist de Ocorrência'){
+    sec=repSecao('Identificação',[['Vistoria',vistCod(v)],['Placa',v.placaCavalo],['Local',(v.cidade||'')+'/'+(v.uf||'')]])
+      +CHECKLIST_TOMBAMENTO.map((et,ei)=>`<div class="rep-sec"><h3>${esc(et.t)}</h3><table class="rep-tbl">${et.itens.map((it,ii)=>`<tr><td>${v.checklist[ei+'-'+ii]?'☑':'☐'} ${esc(it)}</td></tr>`).join('')}</table></div>`).join('')
+      +(v.checklistNota?`<div class="rep-sec"><h3>Anotações</h3><div style="font-size:12px">${esc(v.checklistNota)}</div></div>`:'');
+  } else {
+    sec=repSecao('Veículo',[['Placa cavalo',v.placaCavalo],['Placa carreta',v.placaCarreta],['Modelo',v.modelo],['Transportadora',v.transportadora],['Motorista',v.motorista],['Telefone',v.telMotorista]])
+      +repSecao('Carga',[['Tipo de carga',v.tipoCarga],['Quantidade',v.qtdCarga],['Proprietária',v.empresaCarga],['Seguradora',v.seguradora],['Origem',v.origem],['Destino',v.destino]])
+      +repSecao('Ocorrência',[['Data/hora',v.dataOcorrencia?dataHora(v.dataOcorrencia):'—'],['Município',(v.cidade||'')+'/'+(v.uf||'')],['Localização',v.localizacao],['Rodovia',v.rodovia],['Km',v.km],['Tipo de acidente',v.tipoAcidente],['Situação do veículo',v.situacaoVeiculo],['Danos ambientais',v.danosAmbientais],['Vítimas',v.vitimas],['Equipes acionadas',v.equipes]]);
+    if(v.relatorio) sec+=`<div class="rep-sec"><h3>Relatório / descrição dos fatos</h3><div style="font-size:12px;white-space:pre-wrap">${esc(v.relatorio)}</div></div>`;
+    sec+=fotosHtml;
+  }
+  const sub=vistCod(v)+(v.demandaId?(' · Demanda '+demandaCod(DB.demandas.find(x=>x.id===v.demandaId)||{num:v.demandaId})):'');
+  return repHeader(tipo,sub)+sec+repFooter();
+}
+function renderRelatorios(){
+  const dem=DB.demandas||[],vs=DB.vistorias||[];
+  document.getElementById('relBody').innerHTML=`
+    <div class="demo-banner">ⓘ Escolha uma demanda ou vistoria e gere o documento. Na janela de impressão, escolha <strong>“Salvar como PDF”</strong> para ter o arquivo. Preencha seus dados em <strong>Configurações → Dados do Emitente</strong> para aparecerem no cabeçalho.</div>
+    <div class="panel" style="margin-bottom:16px"><div class="panel-head"><h3 style="font-size:14px">📋 A partir de Demandas</h3></div><div class="panel-body"><div class="tbl-wrap"><table>
+      <thead><tr><th>Código</th><th>Tipo</th><th>Local</th><th>Status</th><th style="text-align:right">Documento</th></tr></thead>
+      <tbody>${dem.length?dem.slice().sort((a,b)=>(b.num||0)-(a.num||0)).map(d=>`<tr><td><strong>${demandaCod(d)}</strong></td><td>${esc(d.tipoServico||'—')}</td><td>${esc(d.cidade||'—')}/${esc(d.uf||'')}</td><td><span class="tag ${STATUS_COR[d.status]||'tag-cinza'}">${esc(d.status)}</span></td><td style="text-align:right"><button class="btn btn-sm btn-ouro" onclick="gerarRelatorioDemanda(${d.id})">📄 Gerar</button></td></tr>`).join(''):'<tr><td colspan="5" class="t-empty">Nenhuma demanda.</td></tr>'}</tbody>
+    </table></div></div></div>
+    <div class="panel"><div class="panel-head"><h3 style="font-size:14px">🚚 A partir de Vistorias</h3></div><div class="panel-body"><div class="tbl-wrap"><table>
+      <thead><tr><th>Código</th><th>Placa</th><th>Local</th><th>Tipo</th><th style="text-align:right">Documento</th></tr></thead>
+      <tbody>${vs.length?vs.slice().sort((a,b)=>(b.num||0)-(a.num||0)).map(v=>`<tr><td><strong>${vistCod(v)}</strong></td><td>${esc(v.placaCavalo||'—')}</td><td>${esc(v.cidade||'—')}/${esc(v.uf||'')}</td><td>${esc(v.tipoAcidente||'—')}</td><td style="text-align:right"><button class="btn btn-sm btn-ouro" onclick="gerarRelatorioVistoria(${v.id})">📄 Gerar</button></td></tr>`).join(''):'<tr><td colspan="5" class="t-empty">Nenhuma vistoria.</td></tr>'}</tbody>
+    </table></div></div></div>`;
+}
+
+/* ---------- MAPA OPERACIONAL ---------- */
+function renderMapa(){
+  const box=document.getElementById('mapaBody');
+  const cids=DB.cidades.filter(c=>c.lat!=null&&c.lng!=null);
+  if(!cids.length){box.innerHTML='<div class="t-empty">Nenhuma cidade com coordenadas. Edite as cidades e informe latitude/longitude.</div>';return;}
+  const lats=cids.map(c=>c.lat),lngs=cids.map(c=>c.lng);
+  let minLat=Math.min(...lats),maxLat=Math.max(...lats),minLng=Math.min(...lngs),maxLng=Math.max(...lngs);
+  const pad=0.6; minLat-=pad;maxLat+=pad;minLng-=pad;maxLng+=pad;
+  const W=900,H=560,m=46;
+  const X=lng=>m+(lng-minLng)/((maxLng-minLng)||1)*(W-2*m);
+  const Y=lat=>m+(maxLat-lat)/((maxLat-minLat)||1)*(H-2*m);
+  const demAbertas=(DB.demandas||[]).filter(demAberta);
+  const pts=cids.map(c=>{
+    const nDem=demAbertas.filter(d=>d.cidade===c.nome).length;
+    const x=X(c.lng),y=Y(c.lat);
+    return `<circle class="cid ${nDem?'ativa':''}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${nDem?8:5}"><title>${esc(c.nome)}/${esc(c.uf)}${nDem?' — '+nDem+' demanda(s) aberta(s)':''}</title></circle>
+      <text class="lbl" x="${(x+8).toFixed(1)}" y="${(y+3).toFixed(1)}">${esc(c.nome)}${nDem?' ('+nDem+')':''}</text>`;
+  }).join('');
+  box.innerHTML=`
+    <div class="demo-banner">ⓘ Mapa <strong>esquemático</strong> posicionado pelas coordenadas reais dos municípios (não é mapa de ruas). Pontos <span style="color:#ec8079">vermelhos</span> têm demandas em aberto. Os links abaixo abrem a localização ou traçam rota no Google Maps (precisa de internet no aparelho).</div>
+    <div class="mapa-wrap"><svg class="mapa-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${pts}</svg></div>
+    <div class="legend"><span><span class="dot" style="background:#2b6fb8"></span>Município atendido</span><span><span class="dot" style="background:#d8463c"></span>Com demanda aberta</span></div>
+    <div class="panel" style="margin-top:16px"><div class="panel-head"><h3 style="font-size:14px">📍 Municípios e navegação</h3></div><div class="panel-body"><div class="tbl-wrap"><table>
+      <thead><tr><th>Município</th><th>UF</th><th>Contatos</th><th>Demandas abertas</th><th style="text-align:right">Navegação</th></tr></thead>
+      <tbody>${cids.slice().sort((a,b)=>a.nome.localeCompare(b.nome)).map(c=>{const nc=DB.contatos.filter(x=>x.cidade===c.nome).length;const nd=demAbertas.filter(d=>d.cidade===c.nome).length;const q=c.lat+','+c.lng;return`<tr><td><strong>${esc(c.nome)}</strong></td><td>${esc(c.uf)}</td><td>${nc}</td><td>${nd?'<span class="tag tag-vermelho">'+nd+'</span>':'0'}</td><td style="text-align:right"><a class="btn btn-sm" href="https://www.google.com/maps/search/?api=1&query=${q}" target="_blank">📍 Abrir</a> <a class="btn btn-sm" href="https://www.google.com/maps/dir/?api=1&destination=${q}" target="_blank">🧭 Rota</a></td></tr>`;}).join('')}</tbody>
+    </table></div></div></div>`;
+}
+
+/* =======================================================================
+   MODAL / UTIL
+   ======================================================================= */
+function setModal(titulo,body,foot){
+  document.getElementById('modalTitle').innerHTML=titulo;
+  document.getElementById('modalBody').innerHTML=body;
+  document.getElementById('modalFoot').innerHTML=foot||`<button class="btn" onclick="closeModal()">Fechar</button>`;
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeModal(){document.getElementById('modalBg').classList.remove('open');}
+document.getElementById('modalBg').addEventListener('click',e=>{if(e.target.id==='modalBg')closeModal();});
+function val(id){const el=document.getElementById(id);return el?el.value:'';}
+async function dl(blob,nome){
+  // Na página publicada (link), usa o download da plataforma; no arquivo local, usa o download normal.
+  try{
+    const dc = (window.claude && claude.use) ? await claude.use('downloads') : null;
+    if(dc){ await dc.save({filename:nome, data:blob}); return; }
+  }catch(e){ if(e&&e.code==='declined') return; /* senão, cai no método local abaixo */ }
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function hoje(){const d=new Date();return`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;}
+
+/* confirm/prompt customizados (sem usar alert nativo feio) */
+function confirmar(msg,onOk){
+  setModal('Confirmação',`<p style="font-size:14px;line-height:1.5">${esc(msg)}</p>`,
+    `<button class="btn" onclick="closeModal()">Cancelar</button>
+     <button class="btn btn-ouro" id="cfBtn">Confirmar</button>`);
+  document.getElementById('cfBtn').onclick=()=>{closeModal();onOk();};
+}
+function prompt1(msg,def,onOk){
+  setModal('Informe',`<div class="fld"><label>${esc(msg)}</label><input id="pmIn" value="${esc(def||'')}"></div>`,
+    `<button class="btn" onclick="closeModal()">Cancelar</button>
+     <button class="btn btn-ouro" id="pmBtn">OK</button>`);
+  setTimeout(()=>document.getElementById('pmIn').focus(),50);
+  document.getElementById('pmBtn').onclick=()=>{const v=val('pmIn');closeModal();onOk(v);};
+}
+
+/* Busca global */
+document.getElementById('globalSearch').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const q=e.target.value.trim();if(!q)return;
+    goTo('contatos');document.getElementById('fContatoBusca').value=q;renderContatos();
+  }
+});
+
+/* =======================================================================
+   INICIALIZAÇÃO
+   ======================================================================= */
+// Garante a estrutura completa, mesmo que o armazenamento/nuvem venha incompleto.
+function normalizeEstrutura(){
+  DB=DB||{};
+  ['cidades','contatos','grupos','empresas','demandas','vistorias','atividades','tiposServico'].forEach(k=>{ if(!Array.isArray(DB[k])) DB[k]=[]; });
+  if(!DB.emitente||typeof DB.emitente!=='object') DB.emitente={};
+  if(!DB.seq||typeof DB.seq!=='object') DB.seq={};
+  ['contato','cidade','empresa','grupo','atividade','demanda','vistoria'].forEach(k=>{ if(!DB.seq[k]) DB.seq[k]=1; });
+  if(!DB.tiposServico.length) DB.tiposServico=[...TIPOS_SERVICO_INICIAIS];
+  DB.seq.demanda=Math.max(DB.seq.demanda,(DB.demandas.reduce((m,d)=>Math.max(m,d.num||d.id||0),0))+1);
+  DB.seq.vistoria=Math.max(DB.seq.vistoria,(DB.vistorias.reduce((m,v)=>Math.max(m,v.num||v.id||0),0))+1);
+}
+(async function init(){
+  try{ if(!load()) seedInicial(true); }
+  catch(e){ try{ seedInicial(true); }catch(_){ DB=DB||{}; } }
+  normalizeEstrutura();
+  try{ updateNavBadges(); }catch(e){}
+  goTo('dashboard');
+  // Nuvem: carrega o que já existe; se estiver vazia, envia a base atual. Depois sincroniza sozinho.
+  if(SB_ON){
+    atualizarStatusNuvem();
+    let veio=false;
+    try{ veio=await nuvemCarregar(); }catch(e){}
+    if(veio){ normalizeEstrutura(); try{ localStorage.setItem(DB_KEY,JSON.stringify(DB)); }catch(e){} try{ updateNavBadges(); }catch(e){} goTo(paginaAtual); }
+    else { try{ await nuvemSalvar(); }catch(e){} }
+    atualizarStatusNuvem();
+    setInterval(nuvemPoll, 15000);
+  }
+})();
+</script>
+</body>
+</html>
