@@ -1300,13 +1300,20 @@ function miniBarras(dados,cor){
    CONTATOS
    ======================================================================= */
 function preencherSelectsContato(){
+  // Preserva a opção já escolhida ao reconstruir as listas (senão o filtro "zera" ao selecionar).
   const cid=document.getElementById('fContatoCidade');
-  cid.innerHTML='<option value="">Todas as cidades</option>'+DB.cidades.map(c=>`<option>${esc(c.nome)}</option>`).join('');
+  const vCid=cid.value;
+  cid.innerHTML='<option value="">Todas as cidades</option>'+uniq(DB.cidades.map(c=>c.nome).filter(Boolean)).sort((a,b)=>a.localeCompare(b)).map(n=>`<option>${esc(n)}</option>`).join('');
+  cid.value=vCid;
   const gr=document.getElementById('fContatoGrupo');
+  const vGr=gr.value;
   gr.innerHTML='<option value="">Todos os grupos</option>'+DB.grupos.map(g=>`<option>${esc(g.nome)}</option>`).join('');
+  gr.value=vGr;
   const fn=document.getElementById('fContatoFuncao');
-  const funcoes=uniq(DB.contatos.map(c=>c.funcao).filter(Boolean));
+  const vFn=fn.value;
+  const funcoes=uniq(DB.contatos.map(c=>c.funcao).filter(Boolean)).sort((a,b)=>a.localeCompare(b));
   fn.innerHTML='<option value="">Todas as funções</option>'+funcoes.map(f=>`<option>${esc(f)}</option>`).join('');
+  fn.value=vFn;
 }
 function renderContatos(){
   preencherSelectsContato();
