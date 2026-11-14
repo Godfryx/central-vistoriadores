@@ -1738,9 +1738,12 @@ function exportCSV(tipo){
   toast('CSV exportado.');
 }
 function csvCell(v){v=(v==null?'':String(v));return/[";\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+/* Coordenadas oficiais (base IBGE) das cidades da rede nacional — usadas para
+   criar automaticamente o município no Mapa Operacional ao importar contatos. */
+const COORDS_REDE={"Alegrete|RS":[-29.7902,-55.7949],"Angico|TO":[-6.3918,-47.8611],"Aracaju|SE":[-10.9091,-37.0677],"Arraial do Cabo|RJ":[-22.9774,-42.0267],"Avaré|SP":[-23.1067,-48.9251],"Balneário Camboriú|SC":[-26.9926,-48.6352],"Bauru|SP":[-22.3246,-49.0871],"Belo Horizonte|MG":[-19.9102,-43.9266],"Belém|PA":[-1.4554,-48.4898],"Biguaçu|SC":[-27.496,-48.6598],"Blumenau|SC":[-26.9155,-49.0709],"Bragança Paulista|SP":[-22.9527,-46.5419],"Brasília|DF":[-15.7795,-47.9297],"Cabedelo|PB":[-6.9873,-34.8284],"Cabo Frio|RJ":[-22.8894,-42.0286],"Cajamar|SP":[-23.355,-46.8781],"Camaçari|BA":[-12.6996,-38.3263],"Campinas|SP":[-22.9053,-47.0659],"Campo Grande|MS":[-20.4486,-54.6295],"Canoinhas|SC":[-26.1766,-50.395],"Cascavel|PR":[-24.9573,-53.459],"Caxias do Sul|RS":[-29.1629,-51.1792],"Chapecó|SC":[-27.1004,-52.6152],"Colombo|PR":[-25.2925,-49.2262],"Concórdia|SC":[-27.2335,-52.026],"Confresa|MT":[-10.6437,-51.5699],"Contagem|MG":[-19.9321,-44.0539],"Cuiabá|MT":[-15.601,-56.0974],"Curitiba|PR":[-25.4195,-49.2646],"Divinópolis|MG":[-20.1446,-44.8912],"Dois Vizinhos|PR":[-25.7407,-53.057],"Dourados|MS":[-22.2231,-54.812],"Feira de Santana|BA":[-12.2664,-38.9663],"Fortaleza|CE":[-3.7166,-38.5423],"Foz do Iguaçu|PR":[-25.5427,-54.5827],"Frederico Westphalen|RS":[-27.3586,-53.3958],"Frutal|MG":[-20.0259,-48.9355],"Goiânia|GO":[-16.6864,-49.2643],"Governador Valadares|MG":[-18.8545,-41.9555],"Gravataí|RS":[-29.9413,-50.9869],"Gurupi|TO":[-11.7279,-49.068],"Iaçu|BA":[-12.7666,-40.2056],"Imperatriz|MA":[-5.5185,-47.4777],"Indaiatuba|SP":[-23.0816,-47.2101],"Ipatinga|MG":[-19.4703,-42.5476],"Itajaí|SC":[-26.9101,-48.6705],"Itaquaquecetuba|SP":[-23.4835,-46.3457],"Itumbiara|GO":[-18.4093,-49.2158],"Jaboticabal|SP":[-21.252,-48.3252],"Jaciara|MT":[-15.9548,-54.9733],"Joinville|SC":[-26.3045,-48.8487],"João Pessoa|PB":[-7.1151,-34.8641],"Jundiaí|SP":[-23.1852,-46.8974],"Lajeado|RS":[-29.4591,-51.9644],"Macaé|RJ":[-22.3768,-41.7848],"Maceió|AL":[-9.666,-35.735],"Manaus|AM":[-3.1187,-60.0212],"Marabá|PA":[-5.3807,-49.1327],"Maringá|PR":[-23.4205,-51.9333],"Mongaguá|SP":[-24.0809,-46.6265],"Montes Claros|MG":[-16.7282,-43.8578],"Nova Mutum|MT":[-13.8374,-56.0743],"Osasco|SP":[-23.5324,-46.7916],"Palmas|TO":[-10.24,-48.3558],"Paraty|RJ":[-23.2221,-44.7175],"Passo Fundo|RS":[-28.2576,-52.4091],"Patos de Minas|MG":[-18.5699,-46.5013],"Patrocínio|MG":[-18.9379,-46.9934],"Paulo Afonso|BA":[-9.3983,-38.2216],"Porto Alegre|RS":[-30.0318,-51.2065],"Poções|BA":[-14.5234,-40.3634],"Recife|PE":[-8.0467,-34.8771],"Ribeirão Preto|SP":[-21.1699,-47.8099],"Rio de Janeiro|RJ":[-22.9129,-43.2003],"Salvador|BA":[-12.9718,-38.5011],"Santa Maria|RS":[-29.6868,-53.8149],"Santos|SP":[-23.9535,-46.335],"Sapiranga|RS":[-29.6349,-51.0064],"Serra Negra|SP":[-22.6139,-46.7033],"Sorocaba|SP":[-23.4969,-47.4451],"Sumaré|SP":[-22.8204,-47.2728],"São José da Lapa|MG":[-19.6971,-43.9586],"São José do Rio Preto|SP":[-20.8113,-49.3758],"São José dos Campos|SP":[-23.1896,-45.8841],"São Paulo|SP":[-23.5329,-46.6395],"São Pedro|SP":[-22.5483,-47.9096],"São Roque|SP":[-23.5226,-47.1357],"Taguatinga|DF":[-15.8333,-48.0578],"Três Corações|MG":[-21.6921,-45.2511],"Uberaba|MG":[-19.7472,-47.9381],"Uberlândia|MG":[-18.9141,-48.2749],"Ubá|MG":[-21.1204,-42.9359],"Uruaçu|GO":[-14.5238,-49.1396],"Vitória da Conquista|BA":[-14.8615,-40.8442]};
 function modeloCSV(){
-  const head=['Nome','Telefone','WhatsApp','Funcao','Cidade','UF','Empresa','Especialidades','Grupos'];
-  const ex=['João Exemplo','(66) 99999-0000','66999990000','Vistoriador','Cuiabá','MT','Autônomo','Vistoria veicular','Prepostos | Grupo de Reguladores'];
+  const head=['Nome','Telefone','WhatsApp','Funcao','Cidade','UF','Empresa','Especialidades','Grupos','Disponibilidade'];
+  const ex=['João Exemplo','(66) 99999-0000','66999990000','Vistoriador','Cuiabá','MT','Autônomo','Vistoria veicular','Prepostos | Grupo de Reguladores','A confirmar'];
   const csv=[head,ex].map(r=>r.map(csvCell).join(';')).join('\r\n');
   dl(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}),'modelo_contatos.csv');
 }
@@ -1754,21 +1757,30 @@ function importCSV(ev){
       const sep=linhas[0].includes(';')?';':',';
       const head=parseCSVLine(linhas[0],sep).map(h=>h.toLowerCase().trim());
       const idx=n=>head.findIndex(h=>h.includes(n));
-      const iNome=idx('nome'),iTel=idx('tel'),iWpp=idx('whats'),iFunc=idx('fun'),iCid=idx('cidade'),iUf=idx('uf'),iEmp=idx('empres'),iEsp=idx('espec'),iGrp=idx('grupo');
-      let add=0;
+      const iNome=idx('nome'),iTel=idx('tel'),iWpp=idx('whats'),iFunc=idx('fun'),iCid=idx('cidade'),iUf=idx('uf'),iEmp=idx('empres'),iEsp=idx('espec'),iGrp=idx('grupo'),iDisp=idx('dispon');
+      let add=0,nCid=0;
       for(let k=1;k<linhas.length;k++){
         const col=parseCSVLine(linhas[k],sep);
         const nome=(col[iNome]||'').trim(); if(!nome)continue;
+        const cidade=((iCid>=0?col[iCid]:'')||'').trim();
+        const uf=(iUf>=0?col[iUf]:'').toUpperCase().trim();
+        const disp=(iDisp>=0&&(col[iDisp]||'').trim())?col[iDisp].trim():'A confirmar';
         DB.contatos.push({id:nextId('contato'),nome,
           tel1:iTel>=0?col[iTel]:'',wpp:iWpp>=0?col[iWpp]:soDigitos(col[iTel]||''),
-          funcao:iFunc>=0?col[iFunc]:'',cidade:iCid>=0?col[iCid]:'',uf:(iUf>=0?col[iUf]:'').toUpperCase(),
+          funcao:iFunc>=0?col[iFunc]:'',cidade,uf,
           empresa:iEmp>=0?col[iEmp]:'',especialidades:iEsp>=0?col[iEsp]:'',
           grupos:iGrp>=0&&col[iGrp]?col[iGrp].split(/[|,]/).map(s=>s.trim()).filter(Boolean):[],
-          servicos:'',disp:'A confirmar',situacao:'ativo',obs:'Importado via CSV'});
+          servicos:'',disp,situacao:'ativo',obs:'Importado via CSV'});
         add++;
+        // Cria o município no Mapa Operacional, se ainda não existir (com coordenada oficial quando disponível).
+        if(cidade && !DB.cidades.some(c=>(c.nome||'').trim().toLowerCase()===cidade.toLowerCase())){
+          const co=COORDS_REDE[cidade+'|'+uf];
+          DB.cidades.push({id:nextId('cidade'),nome:cidade,uf,obs:'',lat:co?co[0]:null,lng:co?co[1]:null});
+          nCid++;
+        }
       }
-      logAtiv('⬆️',`${add} contato(s) importados por planilha`);
-      save();toast(`${add} contato(s) importados.`);goTo('contatos');
+      logAtiv('⬆️',`${add} contato(s) importados por planilha${nCid?' · '+nCid+' município(s) adicionados ao mapa':''}`);
+      save();toast(`${add} contato(s) importados${nCid?' e '+nCid+' cidade(s) no mapa':''}.`);goTo('contatos');
     }catch(e){toast('Não consegui ler o CSV. Confira o modelo.','err');}
     ev.target.value='';
   };
